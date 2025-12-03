@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import sv_ttk
@@ -10,6 +11,17 @@ except ImportError:
 class SafeDriveApp(tk.Tk):
     def __init__(self):
         super().__init__()
+
+        # --- ICONO DE LA VENTANA ---
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        icon_path = os.path.join(base_dir, "SafeDriveLogo_64x64.png")
+
+        try:
+            self.icon_image = tk.PhotoImage(file=icon_path)
+            self.iconphoto(True, self.icon_image)
+        except Exception as e:
+            print("No se pudo cargar el icono:", e)
+        # ---------------------------
 
         self.title("SafeDrive")
         self.geometry("1100x650")
