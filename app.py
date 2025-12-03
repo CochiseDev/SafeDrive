@@ -2,6 +2,7 @@ import os
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import sv_ttk
+from algorithms import entrenar_modelo
 
 try:
     import darkdetect
@@ -186,7 +187,7 @@ class SafeDriveApp(tk.Tk):
 
         btn_fuente_a = ttk.Button(
             tab, text="Seleccionar",
-            command=lambda: self._select_file(self.entry_fuente_a)
+            command=lambda: self._select_file(self.entry_fuente_a, "selected_file_train")
         )
         btn_fuente_a.grid(row=0, column=2, padx=(10, 15), pady=(15, 5))
 
@@ -198,7 +199,7 @@ class SafeDriveApp(tk.Tk):
 
         btn_fuente_b = ttk.Button(
             tab, text="Seleccionar",
-            command=lambda: self._select_file(self.entry_fuente_b)
+            command=lambda: self._select_file(self.entry_fuente_b, "selected_file_b")
         )
         btn_fuente_b.grid(row=1, column=2, padx=(10, 15), pady=5)
 
@@ -225,7 +226,7 @@ class SafeDriveApp(tk.Tk):
         # Botón Ejecutar
         btn_ejecutar = ttk.Button(
             tab, text="Ejecutar", style="Accent.TButton",
-            command=self._fake_train
+            command=self._ejecutar_train
         )
         btn_ejecutar.grid(row=2, column=2, padx=(10, 15), pady=(15, 5), sticky="e")
 
@@ -439,7 +440,7 @@ class SafeDriveApp(tk.Tk):
         btn_guardar_res.grid(row=4, column=2, padx=(10, 15), pady=(5, 15))
 
     # ------------------ FUNCIONES AUXILIARES ------------------ #
-    def _select_file(self, target_entry):
+    def _select_file(self, target_entry, attr_name=None):
         filename = filedialog.askopenfilename(
             title="Seleccionar archivo",
             filetypes=[("Todos los archivos", "*.*")]
@@ -447,30 +448,32 @@ class SafeDriveApp(tk.Tk):
         if filename:
             target_entry.delete(0, "end")
             target_entry.insert(0, filename)
+            if attr_name:
+                setattr(self, attr_name, filename)
 
-    def _fake_train(self):
-        import datetime
-        now = datetime.datetime.now()
+    def _ejecutar_train(self):
+        file_a = getattr(self, "selected_file_train", None)
+        algoritmo = self.combo_algoritmo.get()
 
-        self.lbl_fecha.config(text=f"Fecha: {now:%d/%m/%Y}")
-        self.lbl_ejemplares.config(text="Ejemplares: 1.646")
-        self.lbl_tiempo.config(text="Tiempo de entrenamiento: 00:01:27")
-        self.lbl_alg_seleccionado.config(
-            text=f"Algoritmo seleccionado: {self.combo_algoritmo.get()}"
+        if not file_a:
+            messagebox.showwarning("Atención", "Selecciona un archivo antes de ejecutar.")
+            return
+
+        try:
+            resultados = entrenar_modelo(file_a, algoritmo)
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+            return
+
+        self.lbl_resultado.config(
+            text=(
+                f"RMSE: {resultados['rmse']:.2f}\n"
+                f"R²: {resultados['r2']:.2f}\n"
+                f"MAE: {resultados['mae']:.2f}\n"
+                f"Modelo entrenado correctamente."
+            )
         )
-
-        texto = (
-            "Error medio: 181.10\n"
-            "RMSE: 335.23\n"
-            "MAE: 181.10\n"
-            "R²: 0.854\n\n"
-            "Modelo entrenado correctamente."
-        )
-        self.lbl_resultado.config(text=texto)
-
-
-        messagebox.showinfo("Entrenamiento",
-                            "Entrenamiento completado (ejemplo).")
+        messagebox.showinfo("Entrenamiento", "Modelo entrenado correctamente")
 
     def _save_model(self):
         filename = filedialog.asksaveasfilename(
