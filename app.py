@@ -29,12 +29,7 @@ class SafeDriveApp(tk.Tk):
 
         self.header_bg = "#1d4ed8" 
 
-        self._create_style()
-        self._create_layout()
-
-    # ------------------ ESTILOS ------------------ #
-    def _create_style(self):
-        # Detectar tema del sistema (si darkdetect está instalado)
+        # --- detectar tema del sistema y aplicarlo ---
         system_theme = "light"
         if darkdetect is not None:
             try:
@@ -44,9 +39,14 @@ class SafeDriveApp(tk.Tk):
             except Exception:
                 pass
 
-        # Aplicar Sun Valley con el tema detectado
         sv_ttk.set_theme(system_theme)
+        # ----------------------------------------------------------
 
+        self._create_style()
+        self._create_layout()
+
+    # ------------------ ESTILOS ------------------ #
+    def _create_style(self):
         style = ttk.Style(self)
 
         # Fuente por defecto
@@ -54,7 +54,6 @@ class SafeDriveApp(tk.Tk):
 
         # HEADER azul
         header_bg = "#1d4ed8"
-
         style.configure("Header.TFrame", background=header_bg)
         style.configure(
             "HeaderTitle.TLabel",
@@ -84,8 +83,7 @@ class SafeDriveApp(tk.Tk):
         style.configure("TNotebook.Tab",
                         padding=(18, 8),
                         font=("Segoe UI", 10))
-
-
+    
     # ------------------ LAYOUT PRINCIPAL ------------------ #
     def _create_layout(self):
         # HEADER azul
@@ -170,6 +168,7 @@ class SafeDriveApp(tk.Tk):
 
     def _toggle_theme(self):
         sv_ttk.toggle_theme()
+        self._create_style()         
         self._update_theme_button_icon()
 
     # ------------------ PESTAÑA ENTRENAMIENTO ------------------ #
