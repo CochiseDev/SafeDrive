@@ -11,19 +11,18 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 import numpy as np
 
-# -------------------------------------------
-# Función principal de entrenamiento
-# -------------------------------------------
 def entrenar_modelo(path_csv, algoritmo="Árbol de decisión"):
     """
     path_csv: ruta al CSV de datos
-    algoritmo: nombre del modelo a entrenar ("Árbol de decisión", "Random Forest", "Deep Learning (MLP)")
+    algoritmo: nombre del modelo a entrenar ("Árbol de decisión", "Random Forest", "Deep Learning")
     
-    Retorna un diccionario con resultados y el modelo entrenado.
+    Retorna:
+        resultados: dict con métricas y modelo entrenado
+        df: DataFrame original
     """
     df = pd.read_csv(path_csv, sep=";")
     target = "intensidad"
-    X = df.drop(columns=[target, "fecha"])
+    X = df.drop(columns=[target, "fecha"], errors="ignore")  # Ignorar si no existe columna fecha
     y = df[target]
 
     # Columnas categóricas y numéricas
@@ -54,7 +53,7 @@ def entrenar_modelo(path_csv, algoritmo="Árbol de decisión"):
                 random_state=42
             ))
         ]),
-        "Deep Learning (MLP)": Pipeline([
+        "Deep Learning": Pipeline([
             ("pre", preprocesamiento),
             ("model", MLPRegressor(
                 hidden_layer_sizes=(64,32),
@@ -86,4 +85,4 @@ def entrenar_modelo(path_csv, algoritmo="Árbol de decisión"):
         "modelo": modelo
     }
 
-    return resultados
+    return resultados, df

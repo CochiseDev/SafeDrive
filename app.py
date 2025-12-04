@@ -3,6 +3,8 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import sv_ttk
 from algorithms import entrenar_modelo
+import time
+from datetime import datetime
 
 try:
     import darkdetect
@@ -212,9 +214,6 @@ class SafeDriveApp(tk.Tk):
             values=[
                 "Árbol de decisión",
                 "Random Forest",
-                "Gradient Boosted Trees",
-                "k-NN",
-                "GLM (Modelo Lineal Generalizado)",
                 "Deep Learning"
             ]
         )
@@ -460,11 +459,28 @@ class SafeDriveApp(tk.Tk):
             return
 
         try:
-            resultados = entrenar_modelo(file_a, algoritmo)
+            # Medir tiempo de ejecución
+            start_time = time.time()
+            resultados, df = entrenar_modelo(file_a, algoritmo)  # entrenar_modelo devuelve también el df si quieres
+            end_time = time.time()
+            tiempo_segundos = end_time - start_time
         except Exception as e:
             messagebox.showerror("Error", str(e))
             return
 
+        # Fecha actual
+        fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
+        # Número de ejemplares
+        num_ejemplares = len(df) if df is not None else "Desconocido"
+
+        # Actualizar labels
+        self.lbl_fecha.config(text=f"Fecha: {fecha_actual}")
+        self.lbl_ejemplares.config(text=f"Ejemplares: {num_ejemplares}")
+        self.lbl_tiempo.config(text=f"Tiempo de entrenamiento: {tiempo_segundos:.2f} s")
+        self.lbl_alg_seleccionado.config(text=f"Algoritmo seleccionado: {algoritmo}")
+
+        # Actualizar resultados
         self.lbl_resultado.config(
             text=(
                 f"RMSE: {resultados['rmse']:.2f}\n"
@@ -473,6 +489,7 @@ class SafeDriveApp(tk.Tk):
                 f"Modelo entrenado correctamente."
             )
         )
+
         messagebox.showinfo("Entrenamiento", "Modelo entrenado correctamente")
 
     def _save_model(self):
