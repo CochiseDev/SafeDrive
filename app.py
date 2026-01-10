@@ -2,9 +2,11 @@ import os
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import sv_ttk
-from algorithms import entrenar_modelo
+from algorithms import entrenar_modelo, preparar_datos_prediccion
 import time
 from datetime import datetime
+import pandas as pd
+import joblib
 
 try:
     import darkdetect
@@ -334,11 +336,18 @@ class SafeDriveApp(tk.Tk):
         )
         btn_modelo.grid(row=1, column=2, padx=(10, 15), pady=5)
 
+        # Acción de predicción
+        btn_predecir = ttk.Button(
+            tab, text="Predecir", style="Accent.TButton",
+            command=self._ejecutar_pred
+        )
+        btn_predecir.grid(row=2, column=2, padx=(10, 15), pady=(10, 5), sticky="e")
+
         # Tabla y resumen
         center_frame = ttk.Frame(tab)
-        center_frame.grid(row=2, column=0, columnspan=3,
-                          padx=15, pady=(10, 5), sticky="nsew")
-        tab.rowconfigure(2, weight=1)
+        center_frame.grid(row=3, column=0, columnspan=3,
+                  padx=15, pady=(10, 5), sticky="nsew")
+        tab.rowconfigure(3, weight=1)
         center_frame.columnconfigure(0, weight=3)
         center_frame.columnconfigure(1, weight=1)
 
@@ -414,8 +423,8 @@ class SafeDriveApp(tk.Tk):
 
         # Fila 3: Mapa
         bottom_map = ttk.Frame(tab)
-        bottom_map.grid(row=3, column=0, columnspan=3,
-                        padx=15, pady=(10, 5), sticky="ew")
+        bottom_map.grid(row=4, column=0, columnspan=3,
+                padx=15, pady=(10, 5), sticky="ew")
         for i in range(3):
             bottom_map.columnconfigure(i, weight=1)
 
@@ -427,17 +436,17 @@ class SafeDriveApp(tk.Tk):
 
         # Fila 4: Guardar resultados
         lbl_guardar_res = ttk.Label(tab, text="Guardar resultados:")
-        lbl_guardar_res.grid(row=4, column=0, sticky="e",
-                             padx=(15, 5), pady=(5, 15))
+        lbl_guardar_res.grid(row=5, column=0, sticky="e",
+                     padx=(15, 5), pady=(5, 15))
 
         self.entry_guardar_res = ttk.Entry(tab)
-        self.entry_guardar_res.grid(row=4, column=1, sticky="ew", pady=(5, 15))
+        self.entry_guardar_res.grid(row=5, column=1, sticky="ew", pady=(5, 15))
 
         btn_guardar_res = ttk.Button(
             tab, text="Guardar", style="Accent.TButton",
             command=self._save_results
         )
-        btn_guardar_res.grid(row=4, column=2, padx=(10, 15), pady=(5, 15))
+        btn_guardar_res.grid(row=5, column=2, padx=(10, 15), pady=(5, 15))
 
     # ------------------ FUNCIONES AUXILIARES ------------------ #
     def _select_file(self, target_entry, attr_name=None):
@@ -465,6 +474,12 @@ class SafeDriveApp(tk.Tk):
             resultados, df = entrenar_modelo(file_a, algoritmo)  # entrenar_modelo devuelve también el df si quieres
             end_time = time.time()
             tiempo_segundos = end_time - start_time
+
+            # Guardar modelo y resultados para predicciones y guardado
+            self.trained_model = resultados.get("modelo")
+            self.trained_results = resultados
+            self.trained_df = df
+            self.last_predictions = None
         except Exception as e:
             messagebox.showerror("Error", str(e))
             return
@@ -493,25 +508,132 @@ class SafeDriveApp(tk.Tk):
 
         messagebox.showinfo("Entrenamiento", "Modelo entrenado correctamente")
 
+    def _ejecutar_pred(self):
+        file_pred = self.entry_ejemplares.get()
+        file_model = self.entry_modelo_pred.get()
+        modelo_cargado = getattr(self, "trained_model", None)
+        resultados_entrenamiento = getattr(self, "trained_results", None)
+
+        if not file_pred:
+            messagebox.showwarning("Atención", "Selecciona un archivo de ejemplares a predecir.")
+            return
+
+        # Intentar cargar modelo si se proporciona ruta
+        if file_model and file_model.strip():
+            try:
+                model_package = joblib.load(file_model)
+                if isinstance(model_package, dict) and "modelo" in model_package:
+                    modelo_cargado = model_package["modelo"]
+                    resultados_entrenamiento = model_package
+                else:
+                    # Por compatibilidad con modelos antiguos (solo modelo, sin metadatos)
+                    modelo_cargado = model_package
+                    messagebox.showwarning("Atención", "Modelo cargado pero sin metadatos. Puede fallar la predicción.")
+            except Exception as e:
+                messagebox.showerror("Error", f"No se pudo cargar el modelo: {e}")
+                return
+
+        if modelo_cargado is None or resultados_entrenamiento is None:
+            messagebox.showwarning("Atención", "Primero entrena un modelo o carga uno guardado antes de predecir.")
+            return
+
+        try:
+            df_pred = pd.read_csv(file_pred, sep=";")
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo leer el CSV: {e}")
+            return
+
+        try:
+            df_pred_ready = preparar_datos_prediccion(df_pred, resultados_entrenamiento)
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo preparar el CSV para predecir: {e}")
+            return
+
+        try:
+            start_time = time.time()
+            pred = modelo_cargado.predict(df_pred_ready)
+            elapsed = time.time() - start_time
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo predecir: {e}")
+            return
+
+        # Guardar predicciones para exportar
+        df_out = df_pred.copy()
+        df_out["prediccion_intensidad"] = pred
+        self.last_predictions = df_out
+
+        # Actualizar tabla
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
+        for idx, valor in enumerate(pred, 1):
+            self.tree.insert("", "end", values=(f"Muestra {idx}", "-", f"{valor:.1f}"))
+
+        total = len(pred)
+        media = float(pd.Series(pred).mean()) if total > 0 else 0
+        maximo = float(pd.Series(pred).max()) if total > 0 else 0
+
+        self.lbl_total.config(text=f"Total casos: {total}")
+        self.lbl_vender.config(text=f"Pred. media: {media:.1f}")
+        self.lbl_comprar.config(text=f"Pred. máx: {maximo:.1f}")
+        self.lbl_tiempo_pred.config(text=f"Tiempo: {elapsed:.2f} s")
+        
+        messagebox.showinfo("Predicción", "Predicciones generadas correctamente.")
+
     def _save_model(self):
+        if not hasattr(self, "trained_model") or self.trained_model is None:
+            messagebox.showwarning("Atención", "Primero entrena un modelo antes de guardarlo.")
+            return
+
+        if not hasattr(self, "trained_results") or self.trained_results is None:
+            messagebox.showwarning("Atención", "No hay metadatos de entrenamiento disponibles.")
+            return
+
         filename = filedialog.asksaveasfilename(
             title="Guardar modelo",
             defaultextension=".mdl",
             filetypes=[("Modelo SafeDrive", "*.mdl"), ("Todos", "*.*")]
         )
         if filename:
+            try:
+                # Guardar modelo + metadatos juntos
+                model_package = {
+                    "modelo": self.trained_model,
+                    "features_numericas": self.trained_results.get("features_numericas", []),
+                    "features_categoricas": self.trained_results.get("features_categoricas", []),
+                    "median_values": self.trained_results.get("median_values", {}),
+                    "zona_stats": self.trained_results.get("zona_stats"),
+                    "hora_stats": self.trained_results.get("hora_stats"),
+                    "zona_defaults": self.trained_results.get("zona_defaults", {}),
+                    "hora_defaults": self.trained_results.get("hora_defaults", {}),
+                }
+                joblib.dump(model_package, filename)
+            except Exception as e:
+                messagebox.showerror("Error", f"No se pudo guardar el modelo: {e}")
+                return
+
             self.entry_modelo_path.delete(0, "end")
             self.entry_modelo_path.insert(0, filename)
             messagebox.showinfo("Guardar modelo",
                                 f"Modelo guardado en:\n{filename}")
 
     def _save_results(self):
+        if not hasattr(self, "last_predictions") or self.last_predictions is None:
+            messagebox.showwarning("Atención", "No hay predicciones para guardar. Ejecuta una predicción primero.")
+            return
+
         filename = filedialog.asksaveasfilename(
             title="Guardar resultados",
             defaultextension=".csv",
             filetypes=[("CSV", "*.csv"), ("Todos", "*.*")]
         )
         if filename:
+            try:
+                self.last_predictions.to_csv(filename, index=False, sep=";")
+            except Exception as e:
+                messagebox.showerror("Error", f"No se pudo guardar el CSV: {e}")
+                return
+
             self.entry_guardar_res.delete(0, "end")
             self.entry_guardar_res.insert(0, filename)
             messagebox.showinfo("Guardar resultados",
