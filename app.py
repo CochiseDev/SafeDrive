@@ -212,9 +212,10 @@ class SafeDriveApp(tk.Tk):
         self.combo_algoritmo = ttk.Combobox(
             tab, state="readonly",
             values=[
-                "Árbol de decisión",
-                "Random Forest",
-                "Deep Learning"
+                "Random Forest Mejorado",
+                "Gradient Boosting",
+                "Deep Learning Mejorado",
+                "Árbol de decisión optimizado"
             ]
         )
         self.combo_algoritmo.current(0)
