@@ -15,6 +15,13 @@ except Exception:
     MATPLOTLIB_AVAILABLE = False
 
 try:
+    import folium
+    import webbrowser
+    FOLIUM_AVAILABLE = True
+except Exception:
+    FOLIUM_AVAILABLE = False
+
+try:
     import darkdetect
 except ImportError:
     darkdetect = None
@@ -22,6 +29,19 @@ except ImportError:
 class SafeDriveApp(tk.Tk):
     def __init__(self):
         super().__init__()
+
+        # --- CARGAR ZONAS DE TRÁFICO ---
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        zones_path = os.path.join(base_dir, "12-2024_TrafficZones.csv")
+        try:
+            self.traffic_zones = pd.read_csv(zones_path, sep=";", encoding="latin-1")
+            # Crear diccionario para búsqueda rápida por id
+            self.zones_dict = {int(row['id']): row for idx, row in self.traffic_zones.iterrows()}
+        except Exception as e:
+            print(f"No se pudo cargar zonas de tráfico: {e}")
+            self.traffic_zones = None
+            self.zones_dict = {}
+        # ---------------------------
 
         # --- ICONO DE LA VENTANA ---
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -599,6 +619,83 @@ class SafeDriveApp(tk.Tk):
             niveles.append(nivel)
 
         df_out["nivel_trafico"] = niveles
+        
+        # Función para convertir números con formato de separador de miles
+        def parse_coordinate(value):
+            """Extrae coordenadas WGS84 con máxima precisión.
+            Detecta automáticamente si es latitud o longitud.
+            Madrid: latitud ~40.4°, longitud ~-3.7°
+            """
+            if pd.isna(value):
+                return None
+            try:
+                str_val = str(value).strip()
+                # Remover el signo
+                is_negative = str_val.startswith('-')
+                str_clean = str_val.lstrip('-').replace('.', '')
+                
+                # Detectar si es latitud o longitud basándose en el primer dígito
+                if str_clean.startswith('4'):
+                    # Es latitud (40.xxx...)
+                    # Poner punto después de los 2 primeros dígitos
+                    if len(str_clean) >= 2:
+                        coord = float(str_clean[0:2] + '.' + str_clean[2:])
+                    else:
+                        coord = float(str_clean)
+                elif str_clean.startswith('3'):
+                    # Es longitud (3.xxx...)
+                    # Poner punto después del primer dígito
+                    if len(str_clean) >= 1:
+                        coord = float(str_clean[0:1] + '.' + str_clean[1:])
+                    else:
+                        coord = float(str_clean)
+                else:
+                    # Fallback: asumir que es latitud
+                    if len(str_clean) >= 2:
+                        coord = float(str_clean[0:2] + '.' + str_clean[2:])
+                    else:
+                        coord = float(str_clean)
+                
+                if is_negative:
+                    coord = -coord
+                
+                return coord
+            except Exception as e:
+                return None
+        
+        # Enriquecer con información de zonas
+        if self.zones_dict and "id" in df_pred.columns:
+            zone_names = []
+            zone_coords = []
+            for idx in df_pred["id"]:
+                if int(idx) in self.zones_dict:
+                    zone_info = self.zones_dict[int(idx)]
+                    zone_names.append(zone_info.get("nombre", "Desconocida"))
+                    
+                    lat = parse_coordinate(zone_info.get("latitud"))
+                    lon = parse_coordinate(zone_info.get("longitud"))
+                    
+                    # Fallback a Madrid center si falla la conversión
+                    if lat is None:
+                        lat = 40.4168
+                    if lon is None:
+                        lon = -3.7038
+                    
+                    zone_coords.append({
+                        "id": idx,
+                        "nombre": zone_info.get("nombre", "Desconocida"),
+                        "lat": lat,
+                        "lon": lon
+                    })
+                else:
+                    zone_names.append("Desconocida")
+                    zone_coords.append({"id": idx, "nombre": "Desconocida", "lat": 40.4168, "lon": -3.7038})
+            df_out["zona_nombre"] = zone_names
+            self.last_zone_coords = zone_coords
+        else:
+            df_out["zona_nombre"] = "Desconocida"
+            self.last_zone_coords = []
+        
         self.last_predictions = df_out
 
         # Actualizar tabla
@@ -736,11 +833,76 @@ class SafeDriveApp(tk.Tk):
                                 f"Resultados guardados en:\n{filename}")
 
     def _show_map(self):
-        messagebox.showinfo(
-            "Mapa",
-            "Aquí se mostraría el mapa de posiciones.\n"
-            "(Por ahora es solo un placeholder.)"
-        )
+        if not hasattr(self, 'last_zone_coords') or not self.last_zone_coords:
+            messagebox.showwarning("Mapa", "No hay predicciones para mostrar. Ejecuta una predicción primero.")
+            return
+        
+        if not FOLIUM_AVAILABLE:
+            messagebox.showerror("Error", "Instala folium para ver el mapa: pip install folium")
+            return
+        
+        try:
+            # Centro en Madrid
+            madrid_center = [40.4168, -3.7038]
+            
+            # Crear mapa
+            m = folium.Map(
+                location=madrid_center,
+                zoom_start=11,
+                tiles="OpenStreetMap"
+            )
+            
+            # Colores por nivel de tráfico
+            color_map = {
+                "Bajo": "blue",
+                "Medio": "orange",
+                "Alto": "red"
+            }
+            
+            # Agregar marcadores
+            if hasattr(self, 'last_predictions') and self.last_predictions is not None:
+                for idx, row in self.last_predictions.iterrows():
+                    # Buscar coordenadas
+                    coords = None
+                    for coord_info in self.last_zone_coords:
+                        if coord_info['id'] == row.get('id'):
+                            coords = coord_info
+                            break
+                    
+                    if coords is None:
+                        continue
+                    
+                    nivel = row.get('nivel_trafico', 'Desconocido')
+                    intensidad = row.get('prediccion_intensidad', 0)
+                    zona = row.get('zona_nombre', 'Desconocida')
+                    
+                    color = color_map.get(nivel, "gray")
+                    
+                    popup_text = f"""
+                    <b>Zona:</b> {zona}<br>
+                    <b>ID:</b> {row.get('id')}<br>
+                    <b>Intensidad:</b> {intensidad:.1f}<br>
+                    <b>Nivel:</b> {nivel}
+                    """
+                    
+                    folium.CircleMarker(
+                        location=[coords['lat'], coords['lon']],
+                        radius=8,
+                        popup=folium.Popup(popup_text, max_width=250),
+                        color=color,
+                        fill=True,
+                        fillColor=color,
+                        fillOpacity=0.7,
+                        weight=2
+                    ).add_to(m)
+            
+            # Guardar y abrir
+            map_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mapa_trafico.html")
+            m.save(map_file)
+            webbrowser.open(f"file://{map_file}")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo generar el mapa: {e}")
 
 
 if __name__ == "__main__":

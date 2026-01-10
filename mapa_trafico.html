@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_9a42f7dde59a979bcceff26b24c100eb {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_9a42f7dde59a979bcceff26b24c100eb" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_9a42f7dde59a979bcceff26b24c100eb = L.map(
+                "map_9a42f7dde59a979bcceff26b24c100eb",
+                {
+                    center: [40.4168, -3.7038],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 11,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_4d7b30c2d6b397c2d5dd4b98f01f5e56 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_4d7b30c2d6b397c2d5dd4b98f01f5e56.addTo(map_9a42f7dde59a979bcceff26b24c100eb);
+        
+    
+            var circle_marker_7ad886c13e0c79059cfa3f382c705bc6 = L.circleMarker(
+                [40.4142233235486, -3.66124373004974],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_9a42f7dde59a979bcceff26b24c100eb);
+        
+    
+        var popup_509b024b78cfafcae90e82b677b1fff0 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_5c7a404c5c27c1cc0903df29b715fcc4 = $(`<div id="html_5c7a404c5c27c1cc0903df29b715fcc4" style="width: 100.0%; height: 100.0%;">                     <b>Zona:</b> PM10832<br>                     <b>ID:</b> 3490<br>                     <b>Intensidad:</b> 4030.8<br>                     <b>Nivel:</b> Medio                     </div>`)[0];
+                popup_509b024b78cfafcae90e82b677b1fff0.setContent(html_5c7a404c5c27c1cc0903df29b715fcc4);
+            
+        
+
+        circle_marker_7ad886c13e0c79059cfa3f382c705bc6.bindPopup(popup_509b024b78cfafcae90e82b677b1fff0)
+        ;
+
+        
+    
+    
+            var circle_marker_99fa5009d94fd68aec8e4da2075c39bb = L.circleMarker(
+                [40.4122729516902, -3.65341910212066],
+                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_9a42f7dde59a979bcceff26b24c100eb);
+        
+    
+        var popup_c1e8e3e244cb38893d296dcebc11eb95 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_7f1d4e8c9b540b48d64e8025e92284d7 = $(`<div id="html_7f1d4e8c9b540b48d64e8025e92284d7" style="width: 100.0%; height: 100.0%;">                     <b>Zona:</b> Doctor García Tapia - Fondo Saco-Doctor García Tapia-Arroyo Media Legua<br>                     <b>ID:</b> 6463<br>                     <b>Intensidad:</b> 122.7<br>                     <b>Nivel:</b> Alto                     </div>`)[0];
+                popup_c1e8e3e244cb38893d296dcebc11eb95.setContent(html_7f1d4e8c9b540b48d64e8025e92284d7);
+            
+        
+
+        circle_marker_99fa5009d94fd68aec8e4da2075c39bb.bindPopup(popup_c1e8e3e244cb38893d296dcebc11eb95)
+        ;
+
+        
+    
+    
+            var circle_marker_cd1ad39437cc8c44da1a40e8ce43ca5f = L.circleMarker(
+                [40.3733775739023, -3.74380500826716],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_9a42f7dde59a979bcceff26b24c100eb);
+        
+    
+        var popup_00e558cb0471603c56471c59cd58857d = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_28a034d600c3cdd79b61d00374817f91 = $(`<div id="html_28a034d600c3cdd79b61d00374817f91" style="width: 100.0%; height: 100.0%;">                     <b>Zona:</b> AV.DE LOS POBLADOS ENTRE ANTONIO RODRIGUEZ  Y SECOYA O-E<br>                     <b>ID:</b> 4950<br>                     <b>Intensidad:</b> 444.1<br>                     <b>Nivel:</b> Medio                     </div>`)[0];
+                popup_00e558cb0471603c56471c59cd58857d.setContent(html_28a034d600c3cdd79b61d00374817f91);
+            
+        
+
+        circle_marker_cd1ad39437cc8c44da1a40e8ce43ca5f.bindPopup(popup_00e558cb0471603c56471c59cd58857d)
+        ;
+
+        
+    
+    
+            var circle_marker_cdd2d92161951540867f90b9f6985246 = L.circleMarker(
+                [40.3799429377715, -3.62189343762591],
+                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_9a42f7dde59a979bcceff26b24c100eb);
+        
+    
+        var popup_4ee8aa79d0aa199e4e13b8fafcd04efd = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_483d01a98b24e2bab3eecd71ca64fac3 = $(`<div id="html_483d01a98b24e2bab3eecd71ca64fac3" style="width: 100.0%; height: 100.0%;">                     <b>Zona:</b> Sierra Gador - Manuel Velez-Sierra Vieja<br>                     <b>ID:</b> 5202<br>                     <b>Intensidad:</b> 247.9<br>                     <b>Nivel:</b> Alto                     </div>`)[0];
+                popup_4ee8aa79d0aa199e4e13b8fafcd04efd.setContent(html_483d01a98b24e2bab3eecd71ca64fac3);
+            
+        
+
+        circle_marker_cdd2d92161951540867f90b9f6985246.bindPopup(popup_4ee8aa79d0aa199e4e13b8fafcd04efd)
+        ;
+
+        
+    
+    
+            var circle_marker_2e9c57b659c91815be8b9943a074a13e = L.circleMarker(
+                [40.3931159970616, -3.66606576508628],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_9a42f7dde59a979bcceff26b24c100eb);
+        
+    
+        var popup_985f5785ec87f37d5101c6f6b4c48c0f = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_32c632b4a263459a02507eff071acb39 = $(`<div id="html_32c632b4a263459a02507eff071acb39" style="width: 100.0%; height: 100.0%;">                     <b>Zona:</b> Martínez de la Riva - Arroyo del Olivar-Párroco Emilio Franco<br>                     <b>ID:</b> 5803<br>                     <b>Intensidad:</b> 253.1<br>                     <b>Nivel:</b> Medio                     </div>`)[0];
+                popup_985f5785ec87f37d5101c6f6b4c48c0f.setContent(html_32c632b4a263459a02507eff071acb39);
+            
+        
+
+        circle_marker_2e9c57b659c91815be8b9943a074a13e.bindPopup(popup_985f5785ec87f37d5101c6f6b4c48c0f)
+        ;
+
+        
+    
+    
+            var circle_marker_44dba45190193ca8b25fbd8f057f02ba = L.circleMarker(
+                [40.3868038598133, -3.6811426763629],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_9a42f7dde59a979bcceff26b24c100eb);
+        
+    
+        var popup_666d01a67384a1c9b653ec87ce084461 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_1308b66227425653ac6c00dd81e6fa23 = $(`<div id="html_1308b66227425653ac6c00dd81e6fa23" style="width: 100.0%; height: 100.0%;">                     <b>Zona:</b> PM21185<br>                     <b>ID:</b> 6759<br>                     <b>Intensidad:</b> 360.6<br>                     <b>Nivel:</b> Bajo                     </div>`)[0];
+                popup_666d01a67384a1c9b653ec87ce084461.setContent(html_1308b66227425653ac6c00dd81e6fa23);
+            
+        
+
+        circle_marker_44dba45190193ca8b25fbd8f057f02ba.bindPopup(popup_666d01a67384a1c9b653ec87ce084461)
+        ;
+
+        
+    
+    
+            var circle_marker_a52fa6e8fbf76a83c1f01b43cf452b5a = L.circleMarker(
+                [40.4250324131808, -3.68128480553524],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_9a42f7dde59a979bcceff26b24c100eb);
+        
+    
+        var popup_242e07462cadc3e843b9ab1548f35c89 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_09c6cf8ef941f3be97667838073f34cb = $(`<div id="html_09c6cf8ef941f3be97667838073f34cb" style="width: 100.0%; height: 100.0%;">                     <b>Zona:</b> Goya, 34 O-E - Castello-Principe de Vergara<br>                     <b>ID:</b> 4015<br>                     <b>Intensidad:</b> 116.1<br>                     <b>Nivel:</b> Bajo                     </div>`)[0];
+                popup_242e07462cadc3e843b9ab1548f35c89.setContent(html_09c6cf8ef941f3be97667838073f34cb);
+            
+        
+
+        circle_marker_a52fa6e8fbf76a83c1f01b43cf452b5a.bindPopup(popup_242e07462cadc3e843b9ab1548f35c89)
+        ;
+
+        
+    
+    
+            var circle_marker_82782017e7fc68eea865677b1fa679b3 = L.circleMarker(
+                [40.3728843718928, -3.69486805508549],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_9a42f7dde59a979bcceff26b24c100eb);
+        
+    
+        var popup_5d1712ffe6a3b6836ab5e6bb13587486 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_6ef82c68bfba5237994121553d068ac6 = $(`<div id="html_6ef82c68bfba5237994121553d068ac6" style="width: 100.0%; height: 100.0%;">                     <b>Zona:</b> PM31301<br>                     <b>ID:</b> 7127<br>                     <b>Intensidad:</b> 1708.2<br>                     <b>Nivel:</b> Medio                     </div>`)[0];
+                popup_5d1712ffe6a3b6836ab5e6bb13587486.setContent(html_6ef82c68bfba5237994121553d068ac6);
+            
+        
+
+        circle_marker_82782017e7fc68eea865677b1fa679b3.bindPopup(popup_5d1712ffe6a3b6836ab5e6bb13587486)
+        ;
+
+        
+    
+    
+            var circle_marker_d3a43f628b8016edec85c9c20c44abe5 = L.circleMarker(
+                [40.401787838519, -3.63567983153428],
+                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_9a42f7dde59a979bcceff26b24c100eb);
+        
+    
+        var popup_bddea5785d6fef90745620472aab02d1 = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_64f227cecfbef55b207261f519744bba = $(`<div id="html_64f227cecfbef55b207261f519744bba" style="width: 100.0%; height: 100.0%;">                     <b>Zona:</b> Fuente Carrantona - Luis de Hoyos Saínz-Hacienda de Pavones<br>                     <b>ID:</b> 6423<br>                     <b>Intensidad:</b> 470.1<br>                     <b>Nivel:</b> Alto                     </div>`)[0];
+                popup_bddea5785d6fef90745620472aab02d1.setContent(html_64f227cecfbef55b207261f519744bba);
+            
+        
+
+        circle_marker_d3a43f628b8016edec85c9c20c44abe5.bindPopup(popup_bddea5785d6fef90745620472aab02d1)
+        ;
+
+        
+    
+    
+            var circle_marker_8c4544e739163c91691b1c140e16741c = L.circleMarker(
+                [40.3795946401631, -3.67009592011306],
+                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 2}
+            ).addTo(map_9a42f7dde59a979bcceff26b24c100eb);
+        
+    
+        var popup_8f5e1c0ab94f7b36e5ce2e6642250d1b = L.popup({
+  "maxWidth": 250,
+});
+
+        
+            
+                var html_4573f77e772b97d3a4817953481c1496 = $(`<div id="html_4573f77e772b97d3a4817953481c1496" style="width: 100.0%; height: 100.0%;">                     <b>Zona:</b> Pedroches - Membezar-La Mancha<br>                     <b>ID:</b> 10918<br>                     <b>Intensidad:</b> 289.7<br>                     <b>Nivel:</b> Alto                     </div>`)[0];
+                popup_8f5e1c0ab94f7b36e5ce2e6642250d1b.setContent(html_4573f77e772b97d3a4817953481c1496);
+            
+        
+
+        circle_marker_8c4544e739163c91691b1c140e16741c.bindPopup(popup_8f5e1c0ab94f7b36e5ce2e6642250d1b)
+        ;
+
+        
+    
+</script>
+</html>
