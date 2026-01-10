@@ -26,10 +26,10 @@ El modelo entrenado usaba columnas que **son resultado del tráfico, no predicto
 - **Temporales:** Hora, mes, día semana (variables cíclicas)
 - **Meteorológicas:** Temperatura, humedad, lluvia, viento, nubes
 - **Zona:** ID + estadísticas históricas por zona
-- **Demográficas:** Género y edad de conductores, tipo de vehículo
 
-**Excluidas (No disponibles a priori):**
+**Excluidas (No disponibles a priori o con poco aporte):**
 - ❌ `ocupacion`, `carga`, `vmed` (estado actual)
+- ❌ Datos demográficos: `conductores_hombres`, `conductores_mujeres`, edades, tipos de vehículos (generan ruido, bajo aporte predictivo)
 - ❌ `Lesividad` (consecuencias)
 - ❌ `longitud`, `latitud` (redundante con ID)
 

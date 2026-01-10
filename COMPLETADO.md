@@ -9,6 +9,7 @@
 ### 1. **algorithms.py** - COMPLETAMENTE REFACTORIZADO
 **Cambios principales:**
 - ✓ Eliminadas features incorrectas (ocupacion, carga, vmed)
+- ✓ Eliminados datos demográficos (edad, género, tipo de vehículo) que generaban ruido
 - ✓ Implementadas variables cíclicas (sin/cos) para hora, mes, día
 - ✓ Agregadas estadísticas históricas por zona y hora
 - ✓ Creadas bandas horarias (noche, mañana, tarde, punta)
@@ -21,7 +22,7 @@
 - ✓ Mejorado preprocesamiento (StandardScaler + OneHotEncoder)
 - ✓ Documentación inline completa
 
-**Impacto:** De 120 a 250 líneas, de 3 a 4 modelos, 10x mejor feature engineering
+**Impacto:** De 120 a 250 líneas, de 3 a 4 modelos, feature engineering avanzado sin datos demográficos
 
 ### 2. **app.py** - ACTUALIZADO
 **Cambios:**
@@ -75,12 +76,9 @@
 - ID de zona
 - Media, std, min, max de intensidad histórica
 
-### Demográficas (9):
-- Género: hombres, mujeres
-- Edad: 6 grupos de 18-74 años
-- Vehículos: turismo, moto, furgoneta, bicicleta
+**TOTAL: ~25-30 features después de transformación**
 
-**TOTAL: ~45-50 features después de transformación**
+> **Nota:** Se eliminaron los datos demográficos (edad, género, tipo de vehículo) por añadir ruido sin contribuir significativamente a la precisión.
 
 ---
 
@@ -105,7 +103,10 @@
 | RMSE | ~250-300 | ~200-220 | ↓ 20-30% |
 | MAE | ~150-200 | ~100-120 | ↓ 35-40% |
 | R² | ~0.45-0.55 | ~0.70-0.80 | ↑ 55-70% |
+| Features | 40-50* | 25-30 | ↓ Menos ruido |
 | Funcionalidad | ❌ No | ✓ Sí | ✓ 100% |
+
+*Incluían datos demográficos ruidosos
 
 ---
 
@@ -159,6 +160,7 @@ python evaluar_modelos.py
 - [x] Código comentado
 - [x] Validación funcional
 - [x] GUI actualizada
+- [x] Eliminación de datos demográficos ruidosos
 
 **PROYECTO: 100% COMPLETO**
 

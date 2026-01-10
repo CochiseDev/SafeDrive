@@ -53,17 +53,13 @@ Se ha realizado una optimización significativa del modelo de predicción de int
 - Estadísticas históricas por zona: media, std, min, max de intensidad
 - Estadísticas históricas por hora: media, std de intensidad
 
-**Demográfico (Distribución de conductores y vehículos):**
-- Género: Hombres, Mujeres
-- Edad: Conductores de 18-24, 25-34, 35-44, 45-54, 55-64, 65-74 años
-- Tipo de vehículo: Turismo, Motocicletas, Furgonetas, Bicicletas
-
-#### Features Excluidas (No disponibles a priori):
+#### Features Excluidas (No disponibles a priori o con poco aporte):
 
 - ❌ `carga`: Valor agregado de ocupación × velocidad
 - ❌ `ocupacion`: Porcentaje de ocupación (estado actual)
 - ❌ `vmed`: Velocidad media (estado actual)
 - ❌ `periodo_integracion`: Metadato de integración
+- ❌ Datos demográficos: `conductores_hombres`, `conductores_mujeres`, rangos de edad, tipos de vehículos (generan ruido, bajo aporte predictivo)
 - ❌ `Lesividad_*`: Consecuencias (efecto, no causa)
 - ❌ `longitud, latitud`: Información redundante con ID de zona
 - ❌ `sealevelpressure, solarradiation, solarenergy, uvindex`: Poco relevantes
@@ -193,7 +189,7 @@ predicciones = modelo.predict(X_nuevo)
 ## Estructura de Features
 
 ```
-Total Features: ~40-50 (después de expansión one-hot)
+Total Features: ~25-30 (después de expansión one-hot)
 
 Categorías:
 ├── Temporales (8 features)
@@ -209,17 +205,9 @@ Categorías:
 │   ├── Visibilidad: cloudcover, visibility
 │   └── Tipo: conditionsDay (categorical)
 │
-├── Zona (5 features)
-│   ├── id
-│   └── Estadísticas por zona: media, std, min, max intensidad
-│
-├── Hora Agregada (2 features)
-│   └── Estadísticas por hora: media, std intensidad
-│
-└── Demográfico (9 features)
-    ├── Género: conductores_hombres, conductores_mujeres
-    ├── Edad: De 18-24, 25-34, 35-44, 45-54, 55-64, 65-74 años
-    └── Vehículos: Turismo, Motocicletas, Furgonetas, Bicicletas
+└── Zona (5 features)
+    ├── id
+    └── Estadísticas por zona: media, std, min, max intensidad
 ```
 
 ---

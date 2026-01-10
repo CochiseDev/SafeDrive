@@ -312,7 +312,7 @@ class SafeDriveApp(tk.Tk):
 
         self.lbl_resultado = ttk.Label(
             resultado_card,
-            text="Error medio: -\nRMSE: -\nMAE: -\nR²: -",
+            text="RMSE: -\nR²: -\nMAE: -\nMAPE: -",
             anchor="nw",
             justify="left"
         )
@@ -532,6 +532,7 @@ class SafeDriveApp(tk.Tk):
                 f"RMSE: {resultados['rmse']:.2f}\n"
                 f"R²: {resultados['r2']:.2f}\n"
                 f"MAE: {resultados['mae']:.2f}\n"
+                f"MAPE: {resultados['mape']*100:.2f}%\n"
                 f"Modelo entrenado correctamente."
             )
         )

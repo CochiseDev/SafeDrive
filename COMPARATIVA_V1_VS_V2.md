@@ -121,31 +121,23 @@ SUBTOTAL:          0      2       Nuevo
 
 DEMOGRÁFICAS
 ─────────────────────────────────────────────────────────────────────────────
-conductores_homb   ✗      ✓       Nuevo - hombres
-conductores_muj    ✗      ✓       Nuevo - mujeres
-De18a24años        ✗      ✓       Nuevo - jóvenes
-De25a34años        ✗      ✓       Nuevo - adultos jóvenes
-De35a44años        ✗      ✓       Nuevo - adultos
-De45a54años        ✗      ✓       Nuevo - mediana edad
-De55a64años        ✗      ✓       Nuevo - mayores
-De65a74años        ✗      ✓       Nuevo - más mayores
-Turismo            ✗      ✓       Nuevo - autos
-Motocicletas       ✗      ✓       Nuevo - motos
-Furgonetas         ✗      ✓       Nuevo - comerciales
-Bicicletas         ✗      ✓       Nuevo - bicicletas
-SUBTOTAL:          0      12      Nuevo
-
-EXCLUIDAS (PROBLEMA)
-─────────────────────────────────────────────────────────────────────────────
-ocupacion          ✗      ✗       ❌ Eliminada - estado actual
-carga              ✗      ✗       ❌ Eliminada - estado actual
-vmed               ✗      ✗       ❌ Eliminada - estado actual
-Lesividad_*        ✗      ✗       ❌ Eliminada - consecuencia
-longitud/latitud   ✗      ✗       ❌ Eliminada - redundante
+conductores_homb   ✗      ❌      Eliminada - genera ruido
+conductores_muj    ✗      ❌      Eliminada - genera ruido
+De18a24años        ✗      ❌      Eliminada - genera ruido
+De25a34años        ✗      ❌      Eliminada - genera ruido
+De35a44años        ✗      ❌      Eliminada - genera ruido
+De45a54años        ✗      ❌      Eliminada - genera ruido
+De55a64años        ✗      ❌      Eliminada - genera ruido
+De65a74años        ✗      ❌      Eliminada - genera ruido
+Turismo            ✗      ❌      Eliminada - genera ruido
+Motocicletas       ✗      ❌      Eliminada - genera ruido
+Furgonetas         ✗      ❌      Eliminada - genera ruido
+Bicicletas         ✗      ❌      Eliminada - genera ruido
+SUBTOTAL:          0      0       ❌ Removidas en v2.0
 
 
 ════════════════════════════════════════════════════════════════════════════════
-TOTAL                      ~20     ~45-50
+TOTAL                      ~20     ~25-30 (sin ruido demográfico)
 ════════════════════════════════════════════════════════════════════════════════
 ```
 
@@ -214,7 +206,7 @@ IMPACTO: Sistema funcional en producción
 │  • Zona de carretera                                        │
 │  • Condiciones meteorológicas (pronóstico)                  │
 │  • Datos históricos (estadísticas)                          │
-│  • Demográfica (distribución de conductores)                │
+│  ❌ NO incluir: demográfica (genera ruido)                  │
 │                                                              │
 │  ✓ GENERAMOS (Transformaciones)                            │
 │  ────────────────────────────────────────                   │

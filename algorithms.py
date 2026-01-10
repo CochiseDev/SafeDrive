@@ -88,11 +88,7 @@ def entrenar_modelo(path_csv, algoritmo="Random Forest Mejorado"):
         "id", "zona_intensidad_media", "zona_intensidad_std", "zona_intensidad_min", "zona_intensidad_max",
         "hora_intensidad_media", "hora_intensidad_std",
         "temp", "feelslike", "dew", "humidity", "precip", "precipprob",
-        "windgust", "windspeed", "winddir", "cloudcover", "visibility",
-        "conductores_hombres", "conductores_mujeres",
-        "De 18 a 24 años", "De 25 a 34 años", "De 35 a 44 años", 
-        "De 45 a 54 años", "De 55 a 64 años", "De 65 a 74 años",
-        "Turismo", "Motocicletas", "Furgonetas", "Bicicletas"
+        "windgust", "windspeed", "winddir", "cloudcover", "visibility"
     ]
 
     features_categoricas = [

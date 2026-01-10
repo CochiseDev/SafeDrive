@@ -5,9 +5,7 @@
 2. [Features Temporales](#features-temporales)
 3. [Features Meteorológicas](#features-meteorológicas)
 4. [Features de Zona](#features-de-zona)
-5. [Features Demográficas](#features-demográficas)
-6. [Variables Transformadas](#variables-transformadas)
-7. [Preprocesamiento](#preprocesamiento)
+5. [Preprocesamiento](#preprocesamiento)
 
 ---
 
@@ -20,11 +18,12 @@ Features de Predicción
 ├── Temporales (8)
 ├── Meteorológicas (11)
 ├── Zona (5)
-├── Hora Agregada (2)
-└── Demográficas (9)
+└── Hora Agregada (2)
 ```
 
 **Principio Fundamental:** Solo se utilizan features disponibles **antes de hacer la predicción** (a priori).
+
+> **Nota Importante:** Se han eliminado los datos demográficos (género, edad, tipo de vehículo) que añadían ruido sin contribuir significativamente a la precisión del modelo.
 
 ---
 
@@ -202,60 +201,8 @@ hora_intensidad_std = desviacion_estandar(intensidad) para cada hora
 **Ejemplo:**
 ```
 Hora 08:00: media=500, std=100  (punta matutina)
-Hora 14:00: media=250, std=80   (postmeridiano
+Hora 14:00: media=250, std=80   (postmeridiano)
 Hora 22:00: media=80,  std=30   (noche)
-```
-
----
-
-## Features Demográficas
-
-### Género del Conductor
-
-| Feature | Tipo | Descripción |
-|---------|------|-------------|
-| `conductores_hombres` | Entero | Número de conductores hombres |
-| `conductores_mujeres` | Entero | Número de conductores mujeres |
-
-**Interpretación:**
-- Refleja distribución de género en el tráfico en ese momento
-- Puede correlacionar con patrones de conducción (diferentes franjas de edad, etc.)
-
-### Edad del Conductor
-
-| Feature | Tipo | Rango de Edad | Descripción |
-|---------|------|---------------|-------------|
-| `De 18 a 24 años` | Entero | 18-24 | Conductores jóvenes |
-| `De 25 a 34 años` | Entero | 25-34 | Conductores adultos jóvenes |
-| `De 35 a 44 años` | Entero | 35-44 | Conductores adultos |
-| `De 45 a 54 años` | Entero | 45-54 | Conductores de mediana edad |
-| `De 55 a 64 años` | Entero | 55-64 | Conductores mayores |
-| `De 65 a 74 años` | Entero | 65-74 | Conductores más mayores |
-
-**Interpretación:**
-- Distribución de edades afecta patrones de conducción
-- 18-24: Conducción más agresiva, mayor riesgo
-- 55+: Conducción más cautelosa, mayor fluidez
-
-### Tipo de Vehículo
-
-| Feature | Tipo | Descripción | Impacto |
-|---------|------|-------------|---------|
-| `Turismo` | Entero | Autos/coches de pasajeros | Mayoría del tráfico |
-| `Motocicletas` | Entero | Motos/ciclomotores | Mayor agilidad |
-| `Furgonetas` | Entero | Comerciales pequeños | Mayor volumen |
-| `Bicicletas` | Entero | Bicicletas | Tráfico lento |
-
-**Interpretación:**
-- `Turismo`: Composición principal, refleja congestión general
-- `Motocicletas`: Mejor eficiencia en congestión, menos impacto
-- `Furgonetas`: Entorpecen el tráfico, especialmente en hora punta
-- `Bicicletas`: Pueden ralentizar, especialmente en carril bici congestionado
-
-**Ejemplo de impacto:**
-```
-Escenario A: 30 turismos, 2 motos → Tráfico moderado
-Escenario B: 30 turismos, 10 furgonetas → Tráfico muy congestionado
 ```
 
 ---

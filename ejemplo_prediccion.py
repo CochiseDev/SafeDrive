@@ -18,8 +18,6 @@ def crear_datos_prediccion_ejemplo():
     - Fecha y hora
     - Zona de tráfico (id)
     - Condiciones meteorológicas
-    - Distribución de conductores por género y edad
-    - Distribución de vehículos
     """
     
     # Datos de ejemplo para predecir
@@ -30,20 +28,6 @@ def crear_datos_prediccion_ejemplo():
             '01/01/2024 14:00',  # Medio día
             '01/01/2024 19:00'   # Hora punta vespertina
         ],
-        'estado_meteorológico': [0, 0, 0],  # 0 = sin lluvia
-        'conductores_hombres': [2, 1, 3],
-        'conductores_mujeres': [1, 2, 1],
-        'conductores_desconocidos': [0, 0, 0],
-        'De 18 a 24 años': [0, 1, 0],
-        'De 25 a 34 años': [1, 1, 2],
-        'De 35 a 44 años': [1, 0, 1],
-        'De 45 a 54 años': [1, 1, 0],
-        'De 55 a 64 años': [0, 0, 1],
-        'De 65 a 74 años': [0, 0, 0],
-        'Turismo': [3, 3, 4],
-        'Motocicletas': [0, 0, 0],
-        'Furgonetas': [0, 0, 0],
-        'Bicicletas': [0, 0, 0],
         'temp': [12.5, 18.0, 15.5],
         'feelslike': [10.0, 17.0, 13.5],
         'dew': [8.0, 12.0, 10.0],
@@ -56,7 +40,6 @@ def crear_datos_prediccion_ejemplo():
         'cloudcover': [100, 50, 75],
         'visibility': [10.0, 15.0, 12.0],
         'conditionsDay': ['cloudy', 'partly-cloudy', 'cloudy'],
-        'periodo_integracion': [15, 15, 15],
     }
     
     return pd.DataFrame(datos_ejemplo)

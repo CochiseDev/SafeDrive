@@ -128,12 +128,9 @@ SafeDrive/
 - ID de zona de tráfico
 - Estadísticas históricas: media, std, min, max
 
-### Demográficas (9)
-- Género de conductores (hombres, mujeres)
-- Edad de conductores (6 grupos de edad)
-- Tipo de vehículo (turismo, moto, furgoneta, bicicleta)
+**Total Features:** ~25-30 después de transformación
 
-**Total Features:** ~40-50 después de transformación
+> **Nota:** Se eliminaron las columnas demográficas (edad, género, tipo de vehículo) que añadían ruido sin contribuir significativamente a la precisión del modelo.
 
 ---
 
