@@ -7,6 +7,12 @@ import time
 from datetime import datetime
 import pandas as pd
 import joblib
+try:
+    from matplotlib.figure import Figure
+    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+    MATPLOTLIB_AVAILABLE = True
+except Exception:
+    MATPLOTLIB_AVAILABLE = False
 
 try:
     import darkdetect
@@ -173,8 +179,21 @@ class SafeDriveApp(tk.Tk):
 
     def _toggle_theme(self):
         sv_ttk.toggle_theme()
-        self._create_style()         
+        self._create_style()
         self._update_theme_button_icon()
+        # Actualizar el tema del gráfico
+        if MATPLOTLIB_AVAILABLE and hasattr(self, 'pie_fig'):
+            self._apply_pie_theme()
+            # Re-dibujar el gráfico con los datos actuales
+            if hasattr(self, 'last_predictions') and self.last_predictions is not None:
+                try:
+                    niveles = self.last_predictions['nivel_trafico'].tolist()
+                    bajos = niveles.count('Bajo')
+                    medios = niveles.count('Medio')
+                    altos = niveles.count('Alto')
+                    self._update_pie_chart(bajos, medios, altos)
+                except Exception:
+                    pass
 
     # ------------------ PESTAÑA ENTRENAMIENTO ------------------ #
     def _build_train_tab(self):
@@ -278,18 +297,7 @@ class SafeDriveApp(tk.Tk):
                                 padx=(5, 10), pady=5)
 
 
-        canvas = tk.Canvas(
-            resultado_card, width=180, height=120,
-            bg="#fef2f2", highlightthickness=0
-        )
-        canvas.grid(row=0, column=1, sticky="e", padx=(0, 10), pady=5)
-
-        canvas.create_rectangle(20, 80, 40, 100, outline="", fill="#fecaca")
-        canvas.create_rectangle(50, 60, 70, 100, outline="", fill="#fed7aa")
-        canvas.create_rectangle(80, 40, 100, 100, outline="", fill="#bfdbfe")
-        canvas.create_oval(110, 20, 170, 80, outline="#fb7185", width=2)
-        canvas.create_arc(110, 20, 170, 80, start=0, extent=220,
-                          outline="", fill="#fda4af")
+        # Se eliminan gráficos de muestra en entrenamiento
 
         # Guardar modelo
         lbl_guardar = ttk.Label(tab, text="Guardar modelo:")
@@ -357,17 +365,17 @@ class SafeDriveApp(tk.Tk):
         center_frame.rowconfigure(0, weight=1)
         table_frame.columnconfigure(0, weight=1)
 
-        columns = ("ejemplar", "incidencia", "pred")
+        columns = ("ejemplar", "pred_trafico", "interpretacion")
         self.tree = ttk.Treeview(
             table_frame, columns=columns, show="headings", selectmode="browse"
         )
         self.tree.heading("ejemplar", text="Ejemplar")
-        self.tree.heading("incidencia", text="Incidencia")
-        self.tree.heading("pred", text="Pred.")
+        self.tree.heading("pred_trafico", text="Pred. Tráfico")
+        self.tree.heading("interpretacion", text="Nivel")
 
-        self.tree.column("ejemplar", width=120, anchor="center")
-        self.tree.column("incidencia", width=90, anchor="center")
-        self.tree.column("pred", width=80, anchor="center")
+        self.tree.column("ejemplar", width=140, minwidth=140, anchor="center", stretch=True)
+        self.tree.column("pred_trafico", width=120, minwidth=120, anchor="center", stretch=True)
+        self.tree.column("interpretacion", width=120, minwidth=120, anchor="center", stretch=True)
 
         self.tree.grid(row=0, column=0, sticky="nsew")
 
@@ -378,48 +386,47 @@ class SafeDriveApp(tk.Tk):
         self.tree.configure(yscrollcommand=scrollbar.set)
         table_frame.rowconfigure(0, weight=1)
 
-        # Relleno de ejemplo
-        sample_rows = [
-            ("Posición 1", "Sí", "55%"),
-            ("Posición 2", "No", "27%"),
-            ("Posición 3", "No", "47%"),
-            ("Posición 4", "Sí", "75%"),
-            ("Posición 5", "Sí", "62%"),
-            ("Posición 6", "No", "33%"),
-        ]
-        for row in sample_rows:
-            self.tree.insert("", "end", values=row)
+        # Sin filas de ejemplo: se llenará tras predecir
 
         # Resumen
         resumen_card = ttk.Labelframe(
             center_frame, text="RESUMEN", style="Card.TLabelframe"
         )
         resumen_card.grid(row=0, column=1, sticky="nsew")
+        resumen_card.rowconfigure(5, weight=1)
 
-        self.lbl_total = ttk.Label(resumen_card, text="Total casos: 6")
+        self.lbl_total = ttk.Label(resumen_card, text="Total casos: 0")
         self.lbl_total.grid(row=0, column=0, sticky="w", pady=(2, 0), padx=5)
 
-        self.lbl_vender = ttk.Label(resumen_card, text="Recom. vender: 3")
+        self.lbl_vender = ttk.Label(resumen_card, text="Bajo: 0")
         self.lbl_vender.grid(row=1, column=0, sticky="w", pady=2, padx=5)
 
-        self.lbl_comprar = ttk.Label(resumen_card, text="Recom. comprar: 2")
+        self.lbl_comprar = ttk.Label(resumen_card, text="Medio: 0")
         self.lbl_comprar.grid(row=2, column=0, sticky="w", pady=2, padx=5)
 
+        self.lbl_alto = ttk.Label(resumen_card, text="Alto: 0")
+        self.lbl_alto.grid(row=3, column=0, sticky="w", pady=2, padx=5)
+
         ttk.Separator(resumen_card, orient="horizontal").grid(
-            row=3, column=0, sticky="ew", padx=5, pady=(6, 4)
+            row=6, column=0, sticky="ew", padx=5, pady=(6, 4)
         )
 
         self.lbl_tiempo_pred = ttk.Label(resumen_card, text="Tiempo: -")
-        self.lbl_tiempo_pred.grid(row=4, column=0, sticky="w", pady=2, padx=5)
+        self.lbl_tiempo_pred.grid(row=7, column=0, sticky="w", pady=2, padx=5)
 
-        pie_canvas = tk.Canvas(
-            resumen_card, width=120, height=90,
-            bg="#fefce8", highlightthickness=0
-        )
-        pie_canvas.grid(row=5, column=0, pady=(8, 5))
-        pie_canvas.create_oval(10, 10, 80, 80, fill="#93c5fd", outline="")
-        pie_canvas.create_arc(10, 10, 80, 80, start=30, extent=110,
-                              fill="#f97373", outline="")
+        # Gráfico real: pie chart Bajo/Medio/Alto
+        if MATPLOTLIB_AVAILABLE:
+            self.pie_fig = Figure(figsize=(2.6, 2.2), dpi=100)
+            self.pie_ax = self.pie_fig.add_subplot(111)
+            self.pie_ax.axis('equal')
+            self._apply_pie_theme()
+            self.pie_canvas = FigureCanvasTkAgg(self.pie_fig, master=resumen_card)
+            self.pie_canvas.get_tk_widget().grid(row=5, column=0, pady=(12, 12), padx=12, sticky="nsew")
+            # Inicial vacío (con tema ya aplicado)
+            self._update_pie_chart(0, 0, 0)
+        else:
+            self.lbl_chart_placeholder = ttk.Label(resumen_card, text="Instala matplotlib para ver el gráfico")
+            self.lbl_chart_placeholder.grid(row=5, column=0, pady=(8, 5))
 
         # Fila 3: Mapa
         bottom_map = ttk.Frame(tab)
@@ -560,25 +567,111 @@ class SafeDriveApp(tk.Tk):
         # Guardar predicciones para exportar
         df_out = df_pred.copy()
         df_out["prediccion_intensidad"] = pred
+
+        # Interpretación del nivel de tráfico por id usando estadísticas
+        bajos = medios = altos = 0
+        niveles = []
+        zona_defaults = resultados_entrenamiento.get("zona_defaults", {})
+        default_mean = zona_defaults.get("zona_intensidad_media", float(pd.Series(pred).median()))
+        default_std = zona_defaults.get("zona_intensidad_std", float(pd.Series(pred).std()) or 1.0)
+
+        for i, p in enumerate(pred):
+            try:
+                mean_i = df_pred_ready.iloc[i]["zona_intensidad_media"] if "zona_intensidad_media" in df_pred_ready.columns else default_mean
+                std_i = df_pred_ready.iloc[i]["zona_intensidad_std"] if "zona_intensidad_std" in df_pred_ready.columns else default_std
+                std_i = std_i if std_i and std_i > 0 else default_std
+            except Exception:
+                mean_i, std_i = default_mean, default_std
+
+            z = (p - mean_i) / std_i
+            if z <= -0.5:
+                nivel = "Bajo"
+                bajos += 1
+            elif z >= 0.5:
+                nivel = "Alto"
+                altos += 1
+            else:
+                nivel = "Medio"
+                medios += 1
+            niveles.append(nivel)
+
+        df_out["nivel_trafico"] = niveles
         self.last_predictions = df_out
 
         # Actualizar tabla
         for item in self.tree.get_children():
             self.tree.delete(item)
 
-        for idx, valor in enumerate(pred, 1):
-            self.tree.insert("", "end", values=(f"Muestra {idx}", "-", f"{valor:.1f}"))
+        # Mostrar id como ejemplar si existe, si no usar índice
+        use_id = "id" in df_pred.columns
+        for idx, valor in enumerate(pred):
+            ejemplar = df_pred.iloc[idx]["id"] if use_id else f"Muestra {idx+1}"
+            self.tree.insert("", "end", values=(str(ejemplar), f"{valor:.1f}", niveles[idx]))
 
         total = len(pred)
         media = float(pd.Series(pred).mean()) if total > 0 else 0
         maximo = float(pd.Series(pred).max()) if total > 0 else 0
 
         self.lbl_total.config(text=f"Total casos: {total}")
-        self.lbl_vender.config(text=f"Pred. media: {media:.1f}")
-        self.lbl_comprar.config(text=f"Pred. máx: {maximo:.1f}")
+        self.lbl_vender.config(text=f"Bajo: {bajos}")
+        self.lbl_comprar.config(text=f"Medio: {medios}")
+        self.lbl_alto.config(text=f"Alto: {altos}")
         self.lbl_tiempo_pred.config(text=f"Tiempo: {elapsed:.2f} s")
         
+        # Actualizar gráfico
+        try:
+            self._update_pie_chart(bajos, medios, altos)
+        except Exception:
+            pass
+        
         messagebox.showinfo("Predicción", "Predicciones generadas correctamente.")
+
+    def _apply_pie_theme(self):
+        """Aplica los colores del tema actual al gráfico pie."""
+        if not MATPLOTLIB_AVAILABLE or not hasattr(self, 'pie_fig'):
+            return
+        
+        current_theme = sv_ttk.get_theme()
+        if current_theme == "dark":
+            bg_color = "#1c1c1c"
+            text_color = "white"
+        else:
+            bg_color = "white"
+            text_color = "black"
+        
+        self.pie_fig.patch.set_facecolor(bg_color)
+        self.pie_ax.set_facecolor(bg_color)
+        self.pie_text_color = text_color
+
+    def _update_pie_chart(self, bajos: int, medios: int, altos: int):
+        if MATPLOTLIB_AVAILABLE and hasattr(self, "pie_ax"):
+            self.pie_ax.clear()
+            
+            # Obtener color de texto actual
+            text_color = getattr(self, 'pie_text_color', 'black')
+            
+            sizes = [bajos, medios, altos]
+            labels = ["Bajo", "Medio", "Alto"]
+            colors = ["#60a5fa", "#fbbf24", "#ef4444"]
+            if sum(sizes) == 0:
+                sizes = [1]
+                labels = ["Sin datos"]
+                colors = ["#9ca3af"]
+            
+            self.pie_ax.pie(
+                sizes,
+                labels=labels,
+                autopct='%1.0f%%' if sum(sizes) > 0 else None,
+                startangle=90,
+                colors=colors,
+                textprops={"fontsize": 8, "color": text_color},
+                labeldistance=1.15,
+                pctdistance=0.65
+            )
+            self.pie_ax.axis('equal')
+            self.pie_canvas.draw()
+        elif hasattr(self, "lbl_chart_placeholder"):
+            self.lbl_chart_placeholder.config(text=f"Bajo: {bajos} | Medio: {medios} | Alto: {altos}")
 
     def _save_model(self):
         if not hasattr(self, "trained_model") or self.trained_model is None:
