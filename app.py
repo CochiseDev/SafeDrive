@@ -184,7 +184,7 @@ class SafeDriveApp(tk.Tk):
         # Actualizar el tema del gráfico
         if MATPLOTLIB_AVAILABLE and hasattr(self, 'pie_fig'):
             self._apply_pie_theme()
-            # Re-dibujar el gráfico con los datos actuales
+            # Re-dibujar el gráfico con los datos actuales o vacío si no hay
             if hasattr(self, 'last_predictions') and self.last_predictions is not None:
                 try:
                     niveles = self.last_predictions['nivel_trafico'].tolist()
@@ -194,6 +194,9 @@ class SafeDriveApp(tk.Tk):
                     self._update_pie_chart(bajos, medios, altos)
                 except Exception:
                     pass
+            else:
+                # Si no hay predicciones, mostrar gráfico vacío con el tema actualizado
+                self._update_pie_chart(0, 0, 0)
 
     # ------------------ PESTAÑA ENTRENAMIENTO ------------------ #
     def _build_train_tab(self):
