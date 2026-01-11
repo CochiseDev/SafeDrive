@@ -539,6 +539,46 @@ class SafeDriveApp(tk.Tk):
 
         messagebox.showinfo("Entrenamiento", "Modelo entrenado correctamente")
 
+    def _redondear_hora_a_15(self, fecha_str):
+        """
+        Redondea una hora al :15 más cercano.
+        
+        Entrada: "14/01/2026 08:27" → Salida: "14/01/2026 08:30"
+        Entrada: "14/01/2026 14:12" → Salida: "14/01/2026 14:15"
+        
+        Args:
+            fecha_str: String en formato "DD/MM/YYYY HH:MM"
+            
+        Returns:
+            String en formato "DD/MM/YYYY HH:MM" redondeado al :15 más cercano
+        """
+        try:
+            from math import ceil
+            
+            # Dividir fecha y hora
+            if ' ' in str(fecha_str):
+                fecha_parte, hora_parte = str(fecha_str).rsplit(' ', 1)
+                h, m = map(int, hora_parte.split(':'))
+                
+                # Redondear minutos a múltiplo de 15
+                m_redondeado = ceil(m / 15) * 15
+                
+                # Ajustar hora si minutos pasan de 60
+                if m_redondeado >= 60:
+                    try:
+                        dt = pd.to_datetime(fecha_str, format='%d/%m/%Y %H:%M')
+                        dt_ajustado = dt + pd.Timedelta(minutes=m_redondeado - m)
+                        return dt_ajustado.strftime('%d/%m/%Y %H:%M')
+                    except:
+                        h = (h + 1) % 24
+                        m_redondeado = 0
+                
+                return f"{fecha_parte} {h:02d}:{m_redondeado:02d}"
+            else:
+                return fecha_str
+        except Exception:
+            return fecha_str
+
     def _ejecutar_pred(self):
         file_pred = self.entry_ejemplares.get()
         file_model = self.entry_modelo_pred.get()
@@ -570,6 +610,9 @@ class SafeDriveApp(tk.Tk):
 
         try:
             df_pred = pd.read_csv(file_pred, sep=";")
+            # Redondear automáticamente las horas al :15 más cercano
+            if 'fecha' in df_pred.columns:
+                df_pred['fecha'] = df_pred['fecha'].apply(self._redondear_hora_a_15)
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo leer el CSV: {e}")
             return
