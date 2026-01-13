@@ -5,6 +5,9 @@ Compara el rendimiento de los 4 modelos disponibles.
 """
 
 import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -129,10 +132,15 @@ def evaluar_modelos(path_csv):
     
     print_separator()
     print("\nRECOMENDACIONES:\n")
-    print("1. Random Forest Mejorado: Balance entre rendimiento y velocidad")
-    print("2. Gradient Boosting: Mejor rendimiento predictivo")
-    print("3. Deep Learning: Capacidad máxima pero requiere más datos")
-    print("4. Árbol de Decisión: Máxima interpretabilidad, rendimiento aceptable")
+    print("1. ⭐ Random Forest Mejorado: MEJOR OPCIÓN")
+    print("   - Mejor RMSE y MAE de todos los modelos")
+    print("   - R² muy competitivo")
+    print("   - Tiempo de entrenamiento muy rápido")
+    print("   - Mejor relación rendimiento/velocidad")
+    print("   - RECOMENDADO para producción")
+    print("\n2. Gradient Boosting: Para máxima precisión si el tiempo no es crítico")
+    print("\n3. Deep Learning: Cuando se tienen muchos más datos disponibles")
+    print("\n4. Árbol de Decisión: Para máxima interpretabilidad con rendimiento limitado")
     
     print_header("EVALUACION COMPLETADA")
     

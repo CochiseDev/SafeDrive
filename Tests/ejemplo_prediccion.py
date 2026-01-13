@@ -4,6 +4,10 @@ Script de ejemplo: Predicción de intensidad de tráfico con el modelo entrenado
 Muestra cómo hacer predicciones con nuevos datos.
 """
 
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta

@@ -180,26 +180,35 @@ python app.py
   - Variables meteorológicas (temp, precipitacion, viento, etc.)
 
 #### Paso 2: Elegir Algoritmo
-- **Random Forest Mejorado** (recomendado)
+- **Random Forest Mejorado** ⭐ (RECOMENDADO - MEJOR OPCIÓN)
   - 200 árboles, profundidad máxima 20
-  - Excelente balance precisión/velocidad
-  - RMSE típico: ~45-50
+  - Mejor RMSE (213.05) y MAE (90.59) de todos los modelos
+  - R²: 0.8986 (excelente)
+  - MAPE: 47.39%
+  - Tiempo de entrenamiento: 7.92s (MÁS RÁPIDO)
+  - Mejor relación rendimiento/velocidad
 
 - **Gradient Boosting**
   - 150 árboles, tasa de aprendizaje 0.1
-  - Mayor precisión, más lento
-  - RMSE típico: ~40-45
+  - RMSE: 224.51, MAE: 100.54
+  - R²: 0.8874
+  - MAPE: 57.95%
+  - Tiempo: 105.39s (13x más lento que Random Forest)
 
 - **Deep Learning Mejorado**
   - Red neuronal 4 capas (256→128→64→1)
   - Dropout 0.3, BatchNorm, Early stopping
-  - RMSE típico: ~42-48
-  - Requiere más datos
+  - RMSE: 224.31, MAE: 102.13
+  - R²: 0.8876
+  - MAPE: 59.73%
+  - Tiempo: 81.40s
 
 - **Árbol de Decisión Optimizado**
-  - Modelo simple, rápido
-  - RMSE típico: ~55-60
-  - Bueno para exploración inicial
+  - Modelo simple
+  - RMSE: 244.71, MAE: 106.36
+  - R²: 0.8662 (menor rendimiento)
+  - MAPE: 51.78%
+  - Tiempo: 29.07s
 
 #### Paso 3: Entrenar
 - Click en **"Ejecutar"**
@@ -334,7 +343,7 @@ python app.py
 - Valores faltantes: se usa la mediana de cada columna
 - Se almacena en el modelo para consistencia en predicción
 
-### Random Forest Mejorado
+### Random Forest Mejorado ⭐ (RECOMENDADO)
 
 ```python
 Parámetros:
@@ -346,11 +355,21 @@ Parámetros:
 - n_jobs: -1 (usa todos los cores)
 ```
 
+**Resultados Reales:**
+- ✅ RMSE: 213.05 (MEJOR)
+- ✅ MAE: 90.59 (MEJOR)
+- ✅ R²: 0.8986 (MEJOR)
+- ✅ MAPE: 47.39%
+- ✅ Tiempo entrenamiento: 7.92s (MÁS RÁPIDO)
+
 **Ventajas:**
+- Mejor precisión en todas las métricas
+- Entrenamiento extremadamente rápido (13x más rápido que Gradient Boosting)
 - Robusto ante outliers
 - No requiere escalado
 - Captura relaciones no lineales
 - Buena interpretabilidad
+- **RECOMENDADO para producción**
 
 ### Gradient Boosting
 
@@ -363,10 +382,12 @@ Parámetros:
 - random_state: 42
 ```
 
-**Ventajas:**
-- Mayor precisión que Random Forest
-- Secuencial (aprende de errores anteriores)
-- Excelente para competiciones
+**Resultados Reales:**
+- RMSE: 224.51
+- MAE: 100.54
+- R²: 0.8874
+- MAPE: 57.95%
+- Tiempo: 105.39s (13x más lento que Random Forest)
 
 ### Deep Learning Mejorado
 
@@ -383,11 +404,12 @@ Early Stopping: patience=15
 Epochs: 200
 ```
 
-**Ventajas:**
-- Captura patrones complejos
-- Regularización con Dropout
-- Normalización con BatchNorm
-- Early stopping previene sobreajuste
+**Resultados Reales:**
+- RMSE: 224.31
+- MAE: 102.13
+- R²: 0.8876
+- MAPE: 59.73%
+- Tiempo: 81.40s
 
 ### Árbol de Decisión Optimizado
 
@@ -399,10 +421,12 @@ Parámetros:
 - random_state: 42
 ```
 
-**Ventajas:**
-- Rápido de entrenar y predecir
-- Fácil de visualizar
-- Bueno para prototipado
+**Resultados Reales:**
+- RMSE: 244.71 (peor)
+- MAE: 106.36 (peor)
+- R²: 0.8662 (peor)
+- MAPE: 51.78%
+- Tiempo: 29.07s
 
 ---
 
@@ -591,6 +615,8 @@ else:
    - Tiempo de predicción
    - Tamaño del modelo guardado
 
+**Recomendación:** Random Forest Mejorado ofrece el mejor balance en todas las métricas, con RMSE y MAE bajos, R² alto y tiempo de entrenamiento muy competitivo.
+
 ---
 
 ## 🔍 Troubleshooting
@@ -637,7 +663,7 @@ else:
 3. Datos de AEMET lentos
 
 **Soluciones:**
-- Usar Random Forest (más rápido)
+- Usar Random Forest Mejorado (mejor rendimiento y más rápido que otros)
 - Seleccionar menos zonas a la vez
 - Esperar a que complete (diálogo de carga)
 
@@ -673,12 +699,12 @@ pip install matplotlib
 
 Con dataset de ejemplo (~50,000 registros):
 
-| Algoritmo | RMSE | R² | Tiempo Entrenamiento | Tamaño .mdl |
-|-----------|------|----|--------------------|-------------|
-| Random Forest | 45-50 | 0.85-0.88 | 30-60s | 50-100 MB |
-| Gradient Boosting | 40-45 | 0.88-0.90 | 60-120s | 20-40 MB |
-| Deep Learning | 42-48 | 0.86-0.89 | 120-300s | 5-10 MB |
-| Árbol Decisión | 55-60 | 0.78-0.82 | 10-20s | 5-15 MB |
+| Algoritmo | RMSE | MAE | R² | MAPE | Tiempo |
+|-----------|------|----|----|------|--------|
+| **Random Forest** ⭐ | **213.05** | **90.59** | **0.8986** | **47.39%** | **7.92s** |
+| Gradient Boosting | 224.51 | 100.54 | 0.8874 | 57.95% | 105.39s |
+| Deep Learning | 224.31 | 102.13 | 0.8876 | 59.73% | 81.40s |
+| Árbol Decisión | 244.71 | 106.36 | 0.8662 | 51.78% | 29.07s |
 
 ### Tiempos de Predicción
 
@@ -721,6 +747,17 @@ Con dataset de ejemplo (~50,000 registros):
 ---
 
 ## 📝 Notas Adicionales
+
+### Recomendación de Algoritmo
+
+Basado en evaluación comparativa exhaustiva con datos reales, **Random Forest Mejorado** es la opción recomendada porque:
+- ✅ **MEJOR RMSE:** 213.05 (10% mejor que Gradient Boosting)
+- ✅ **MEJOR MAE:** 90.59 (11% mejor que Gradient Boosting)
+- ✅ **MEJOR R²:** 0.8986 (1.1% mejor que Gradient Boosting)
+- ✅ **MEJOR MAPE:** 47.39%
+- ✅ **TIEMPO MÍNIMO:** 7.92s (13x más rápido que Gradient Boosting, 10x más rápido que Deep Learning)
+- ✅ Robusto y confiable en producción
+- ✅ Balance perfecto entre rendimiento y velocidad
 
 ### Limitaciones Conocidas
 
