@@ -3,10 +3,13 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import sv_ttk
 from algorithms import entrenar_modelo, preparar_datos_prediccion
+from user_mode import UserModeTab
 import time
 from datetime import datetime
 import pandas as pd
 import joblib
+import threading
+from threading import Thread
 try:
     from matplotlib.figure import Figure
     from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -25,6 +28,62 @@ try:
     import darkdetect
 except ImportError:
     darkdetect = None
+
+class LoadingDialog(tk.Toplevel):
+    """Diálogo de carga con spinner animado."""
+    def __init__(self, parent, title="Cargando", message="Por favor espera..."):
+        super().__init__(parent)
+        self.title(title)
+        self.geometry("300x150")
+        self.resizable(False, False)
+        self.transient(parent)
+        self.grab_set()
+        
+        # Centrar ventana
+        self.update_idletasks()
+        x = parent.winfo_x() + (parent.winfo_width() // 2) - 150
+        y = parent.winfo_y() + (parent.winfo_height() // 2) - 75
+        self.geometry(f"+{x}+{y}")
+        
+        # Frame principal con padding
+        main_frame = ttk.Frame(self, padding=20)
+        main_frame.pack(fill="both", expand=True)
+        
+        # Label del mensaje
+        msg_label = ttk.Label(main_frame, text=message, font=("Segoe UI", 11), justify="center")
+        msg_label.pack(pady=(0, 20))
+        
+        # Frame para el spinner
+        spinner_frame = ttk.Frame(main_frame)
+        spinner_frame.pack(expand=True)
+        
+        # Label del spinner con fuente más grande
+        self.spinner_label = ttk.Label(spinner_frame, text="", font=("Segoe UI", 20), foreground="blue")
+        self.spinner_label.pack()
+        
+        # Caracteres para animar
+        self.spinner_chars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+        self.spinner_index = 0
+        self.is_running = True
+        
+        # Iniciar animación
+        self.animate()
+        
+        # Evitar que se cierre con el botón X
+        self.protocol("WM_DELETE_WINDOW", lambda: None)
+    
+    def animate(self):
+        """Anima el spinner."""
+        if self.is_running:
+            char = self.spinner_chars[self.spinner_index % len(self.spinner_chars)]
+            self.spinner_label.config(text=char)
+            self.spinner_index += 1
+            self.after(100, self.animate)
+    
+    def close(self):
+        """Cierra el diálogo de carga."""
+        self.is_running = False
+        self.destroy()
 
 class SafeDriveApp(tk.Tk):
     def __init__(self):
@@ -169,12 +228,18 @@ class SafeDriveApp(tk.Tk):
         self.pred_tab = ttk.Frame(self.notebook)
 
         self.notebook.add(self.train_tab, text="Entrenamiento")
-        self.notebook.add(self.pred_tab, text="Predicción")
+        self.notebook.add(self.pred_tab, text="Predicción (Técnico)")
 
         self.notebook.bind("<<NotebookTabChanged>>", self._on_tab_changed)
 
         self._build_train_tab()
         self._build_pred_tab()
+        
+        # Agregar pestaña de Usuario Normal
+        if self.traffic_zones is not None:
+            self.user_mode_tab = UserModeTab(self.notebook, self.traffic_zones)
+        else:
+            print("⚠️ No se pudo cargar zonas de tráfico para modo Usuario Normal")
 
         # Ajustar icono del botón según el tema actual
         self._update_theme_button_icon()
@@ -201,7 +266,7 @@ class SafeDriveApp(tk.Tk):
         sv_ttk.toggle_theme()
         self._create_style()
         self._update_theme_button_icon()
-        # Actualizar el tema del gráfico
+        # Actualizar el tema del gráfico en Predicción (Técnico)
         if MATPLOTLIB_AVAILABLE and hasattr(self, 'pie_fig'):
             self._apply_pie_theme()
             # Re-dibujar el gráfico con los datos actuales o vacío si no hay
@@ -217,6 +282,13 @@ class SafeDriveApp(tk.Tk):
             else:
                 # Si no hay predicciones, mostrar gráfico vacío con el tema actualizado
                 self._update_pie_chart(0, 0, 0)
+        
+        # Actualizar el tema del gráfico en Usuario Normal
+        if hasattr(self, 'user_mode_tab'):
+            try:
+                self.user_mode_tab.refresh_theme()
+            except Exception:
+                pass
 
     # ------------------ PESTAÑA ENTRENAMIENTO ------------------ #
     def _build_train_tab(self):
@@ -224,34 +296,22 @@ class SafeDriveApp(tk.Tk):
         tab.columnconfigure(1, weight=1)
         tab.columnconfigure(2, weight=0)
 
-        # Fuentes A y B
-        lbl_a = ttk.Label(tab, text="Fuente de datos A:")
-        lbl_a.grid(row=0, column=0, sticky="e", padx=(15, 5), pady=(15, 5))
+        # Fuente de datos
+        lbl_datos = ttk.Label(tab, text="Fuente de datos:")
+        lbl_datos.grid(row=0, column=0, sticky="e", padx=(15, 5), pady=(15, 5))
 
-        self.entry_fuente_a = ttk.Entry(tab)
-        self.entry_fuente_a.grid(row=0, column=1, sticky="ew", pady=(15, 5))
+        self.entry_fuente = ttk.Entry(tab)
+        self.entry_fuente.grid(row=0, column=1, sticky="ew", pady=(15, 5))
 
-        btn_fuente_a = ttk.Button(
+        btn_fuente = ttk.Button(
             tab, text="Seleccionar",
-            command=lambda: self._select_file(self.entry_fuente_a, "selected_file_train")
+            command=lambda: self._select_file(self.entry_fuente, "selected_file_train", ".csv")
         )
-        btn_fuente_a.grid(row=0, column=2, padx=(10, 15), pady=(15, 5))
-
-        lbl_b = ttk.Label(tab, text="Fuente de datos B:")
-        lbl_b.grid(row=1, column=0, sticky="e", padx=(15, 5), pady=5)
-
-        self.entry_fuente_b = ttk.Entry(tab)
-        self.entry_fuente_b.grid(row=1, column=1, sticky="ew", pady=5)
-
-        btn_fuente_b = ttk.Button(
-            tab, text="Seleccionar",
-            command=lambda: self._select_file(self.entry_fuente_b, "selected_file_b")
-        )
-        btn_fuente_b.grid(row=1, column=2, padx=(10, 15), pady=5)
+        btn_fuente.grid(row=0, column=2, padx=(10, 15), pady=(15, 5))
 
         # Selector de algoritmo
         lbl_alg = ttk.Label(tab, text="Seleccionar algoritmo:")
-        lbl_alg.grid(row=2, column=0, sticky="e", padx=(15, 5), pady=(15, 5))
+        lbl_alg.grid(row=1, column=0, sticky="e", padx=(15, 5), pady=(15, 5))
 
         self.combo_algoritmo = ttk.Combobox(
             tab, state="readonly",
@@ -263,7 +323,7 @@ class SafeDriveApp(tk.Tk):
             ]
         )
         self.combo_algoritmo.current(0)
-        self.combo_algoritmo.grid(row=2, column=1, sticky="w", pady=(15, 5))
+        self.combo_algoritmo.grid(row=1, column=1, sticky="w", pady=(15, 5))
 
         self.combo_algoritmo.bind("<<ComboboxSelected>>", self._on_combo_select)
 
@@ -272,15 +332,15 @@ class SafeDriveApp(tk.Tk):
             tab, text="Ejecutar", style="Accent.TButton",
             command=self._ejecutar_train
         )
-        btn_ejecutar.grid(row=2, column=2, padx=(10, 15), pady=(15, 5), sticky="e")
+        btn_ejecutar.grid(row=1, column=2, padx=(10, 15), pady=(15, 5), sticky="e")
 
         # Vista previa de resultados
         preview_card = ttk.Labelframe(
             tab, text="VISTA PREVIA", style="Card.TLabelframe"
         )
-        preview_card.grid(row=3, column=0, columnspan=3,
+        preview_card.grid(row=2, column=0, columnspan=3,
                           padx=15, pady=(15, 5), sticky="nsew")
-        tab.rowconfigure(3, weight=0)
+        tab.rowconfigure(2, weight=0)
 
         for i in range(2):
             preview_card.columnconfigure(i, weight=1)
@@ -304,9 +364,9 @@ class SafeDriveApp(tk.Tk):
         resultado_card = ttk.Labelframe(
             tab, text="Resultado", style="Card.TLabelframe"
         )
-        resultado_card.grid(row=4, column=0, columnspan=3,
+        resultado_card.grid(row=3, column=0, columnspan=3,
                             padx=15, pady=(10, 5), sticky="nsew")
-        tab.rowconfigure(4, weight=1)
+        tab.rowconfigure(3, weight=1)
         resultado_card.columnconfigure(0, weight=3)
         resultado_card.columnconfigure(1, weight=1)
 
@@ -319,22 +379,21 @@ class SafeDriveApp(tk.Tk):
         self.lbl_resultado.grid(row=0, column=0, sticky="nsew",
                                 padx=(5, 10), pady=5)
 
-
         # Se eliminan gráficos de muestra en entrenamiento
 
-        # Guardar modelo
+        # Guardar modelo (ahora en fila 4)
         lbl_guardar = ttk.Label(tab, text="Guardar modelo:")
-        lbl_guardar.grid(row=5, column=0, sticky="e",
+        lbl_guardar.grid(row=4, column=0, sticky="e",
                          padx=(15, 5), pady=(10, 15))
 
         self.entry_modelo_path = ttk.Entry(tab)
-        self.entry_modelo_path.grid(row=5, column=1, sticky="ew", pady=(10, 15))
+        self.entry_modelo_path.grid(row=4, column=1, sticky="ew", pady=(10, 15))
 
         btn_guardar_modelo = ttk.Button(
             tab, text="Guardar", style="Accent.TButton",
             command=self._save_model
         )
-        btn_guardar_modelo.grid(row=5, column=2, padx=(10, 15), pady=(10, 15))
+        btn_guardar_modelo.grid(row=4, column=2, padx=(10, 15), pady=(10, 15))
 
     # ------------------ PESTAÑA PREDICCIÓN ------------------ #
     def _build_pred_tab(self):
@@ -351,7 +410,7 @@ class SafeDriveApp(tk.Tk):
 
         btn_ejemplares = ttk.Button(
             tab, text="Seleccionar",
-            command=lambda: self._select_file(self.entry_ejemplares)
+            command=lambda: self._select_file(self.entry_ejemplares, None, ".csv")
         )
         btn_ejemplares.grid(row=0, column=2, padx=(10, 15), pady=(15, 5))
 
@@ -363,11 +422,11 @@ class SafeDriveApp(tk.Tk):
 
         btn_modelo = ttk.Button(
             tab, text="Seleccionar",
-            command=lambda: self._select_file(self.entry_modelo_pred)
+            command=lambda: self._select_file(self.entry_modelo_pred, None, ".mdl")
         )
         btn_modelo.grid(row=1, column=2, padx=(10, 15), pady=5)
 
-        # Acción de predicción
+        # Acción de predicción y indicador de carga
         btn_predecir = ttk.Button(
             tab, text="Predecir", style="Accent.TButton",
             command=self._ejecutar_pred
@@ -479,10 +538,17 @@ class SafeDriveApp(tk.Tk):
         btn_guardar_res.grid(row=5, column=2, padx=(10, 15), pady=(5, 15))
 
     # ------------------ FUNCIONES AUXILIARES ------------------ #
-    def _select_file(self, target_entry, attr_name=None):
+    def _select_file(self, target_entry, attr_name=None, extension=None):
+        filetypes = [("Todos los archivos", "*.*")]
+        
+        if extension == ".csv":
+            filetypes = [("CSV files", "*.csv"), ("Todos los archivos", "*.*")]
+        elif extension == ".mdl":
+            filetypes = [("MDL files", "*.mdl"), ("Todos los archivos", "*.*")]
+        
         filename = filedialog.askopenfilename(
             title="Seleccionar archivo",
-            filetypes=[("Todos los archivos", "*.*")]
+            filetypes=filetypes
         )
         if filename:
             target_entry.delete(0, "end")
@@ -498,10 +564,19 @@ class SafeDriveApp(tk.Tk):
             messagebox.showwarning("Atención", "Selecciona un archivo antes de ejecutar.")
             return
 
+        # Crear diálogo de carga
+        loading_dialog = LoadingDialog(self, title="Entrenamiento", message="Entrenando modelo...\nEsto puede tardar varios minutos")
+        
+        # Iniciar entrenamiento en un hilo separado
+        thread = Thread(target=self._train_worker, args=(file_a, algoritmo, loading_dialog), daemon=True)
+        thread.start()
+
+    def _train_worker(self, file_a, algoritmo, loading_dialog):
+        """Función que se ejecuta en un hilo separado para entrenar el modelo."""
         try:
             # Medir tiempo de ejecución
             start_time = time.time()
-            resultados, df = entrenar_modelo(file_a, algoritmo)  # entrenar_modelo devuelve también el df si quieres
+            resultados, df = entrenar_modelo(file_a, algoritmo)
             end_time = time.time()
             tiempo_segundos = end_time - start_time
 
@@ -510,10 +585,18 @@ class SafeDriveApp(tk.Tk):
             self.trained_results = resultados
             self.trained_df = df
             self.last_predictions = None
+            
+            # Actualizar UI desde el hilo principal
+            self.after(0, lambda: self._update_train_results(tiempo_segundos, resultados, df, algoritmo))
+            
         except Exception as e:
-            messagebox.showerror("Error", str(e))
-            return
+            self.after(0, lambda: messagebox.showerror("Error", str(e)))
+        finally:
+            # Cerrar el diálogo de carga
+            self.after(100, lambda: loading_dialog.close())
 
+    def _update_train_results(self, tiempo_segundos, resultados, df, algoritmo):
+        """Actualiza los resultados en la UI (llamado desde el hilo principal con after)."""
         # Fecha actual
         fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
@@ -582,55 +665,83 @@ class SafeDriveApp(tk.Tk):
     def _ejecutar_pred(self):
         file_pred = self.entry_ejemplares.get()
         file_model = self.entry_modelo_pred.get()
-        modelo_cargado = getattr(self, "trained_model", None)
-        resultados_entrenamiento = getattr(self, "trained_results", None)
 
         if not file_pred:
             messagebox.showwarning("Atención", "Selecciona un archivo de ejemplares a predecir.")
             return
 
-        # Intentar cargar modelo si se proporciona ruta
-        if file_model and file_model.strip():
-            try:
-                model_package = joblib.load(file_model)
-                if isinstance(model_package, dict) and "modelo" in model_package:
-                    modelo_cargado = model_package["modelo"]
-                    resultados_entrenamiento = model_package
-                else:
-                    # Por compatibilidad con modelos antiguos (solo modelo, sin metadatos)
-                    modelo_cargado = model_package
-                    messagebox.showwarning("Atención", "Modelo cargado pero sin metadatos. Puede fallar la predicción.")
-            except Exception as e:
-                messagebox.showerror("Error", f"No se pudo cargar el modelo: {e}")
+        # Crear diálogo de carga
+        loading_dialog = LoadingDialog(self, title="Predicción", message="Realizando predicción...\nPor favor espera")
+        
+        # Iniciar predicción en un hilo separado
+        thread = Thread(target=self._pred_worker, args=(file_pred, file_model, loading_dialog), daemon=True)
+        thread.start()
+
+    def _pred_worker(self, file_pred, file_model, loading_dialog):
+        """Función que se ejecuta en un hilo separado para hacer predicciones."""
+        try:
+            modelo_cargado = getattr(self, "trained_model", None)
+            resultados_entrenamiento = getattr(self, "trained_results", None)
+
+            # Intentar cargar modelo si se proporciona ruta
+            if file_model and file_model.strip():
+                try:
+                    model_package = joblib.load(file_model)
+                    if isinstance(model_package, dict) and "modelo" in model_package:
+                        modelo_cargado = model_package["modelo"]
+                        resultados_entrenamiento = model_package
+                    else:
+                        # Por compatibilidad con modelos antiguos (solo modelo, sin metadatos)
+                        modelo_cargado = model_package
+                        self.after(0, lambda: messagebox.showwarning("Atención", "Modelo cargado pero sin metadatos. Puede fallar la predicción."))
+                except Exception as e:
+                    self.after(0, lambda: messagebox.showerror("Error", f"No se pudo cargar el modelo: {e}"))
+                    self.after(0, lambda: loading_dialog.close())
+                    return
+
+            if modelo_cargado is None or resultados_entrenamiento is None:
+                self.after(0, lambda: messagebox.showwarning("Atención", "Primero entrena un modelo o carga uno guardado antes de predecir."))
+                self.after(0, lambda: loading_dialog.close())
                 return
 
-        if modelo_cargado is None or resultados_entrenamiento is None:
-            messagebox.showwarning("Atención", "Primero entrena un modelo o carga uno guardado antes de predecir.")
-            return
+            try:
+                df_pred = pd.read_csv(file_pred, sep=";")
+                # Redondear automáticamente las horas al :15 más cercano
+                if 'fecha' in df_pred.columns:
+                    df_pred['fecha'] = df_pred['fecha'].apply(self._redondear_hora_a_15)
+            except Exception as e:
+                self.after(0, lambda: messagebox.showerror("Error", f"No se pudo leer el CSV: {e}"))
+                self.after(0, lambda: loading_dialog.close())
+                return
 
-        try:
-            df_pred = pd.read_csv(file_pred, sep=";")
-            # Redondear automáticamente las horas al :15 más cercano
-            if 'fecha' in df_pred.columns:
-                df_pred['fecha'] = df_pred['fecha'].apply(self._redondear_hora_a_15)
+            try:
+                df_pred_ready = preparar_datos_prediccion(df_pred, resultados_entrenamiento)
+            except Exception as e:
+                self.after(0, lambda: messagebox.showerror("Error", f"No se pudo preparar el CSV para predecir: {e}"))
+                self.after(0, lambda: loading_dialog.close())
+                return
+
+            try:
+                start_time = time.time()
+                pred = modelo_cargado.predict(df_pred_ready)
+                elapsed = time.time() - start_time
+            except Exception as e:
+                self.after(0, lambda: messagebox.showerror("Error", f"No se pudo predecir: {e}"))
+                self.after(0, lambda: loading_dialog.close())
+                return
+
+            # Llamar a actualización de UI desde el hilo principal
+            self.after(0, lambda: self._update_pred_results(df_pred, df_pred_ready, pred, elapsed, resultados_entrenamiento))
+            
+            # Cerrar el diálogo de carga
+            self.after(100, lambda: loading_dialog.close())
+            
         except Exception as e:
-            messagebox.showerror("Error", f"No se pudo leer el CSV: {e}")
-            return
+            self.after(0, lambda: messagebox.showerror("Error", str(e)))
+            self.after(0, lambda: loading_dialog.close())
 
-        try:
-            df_pred_ready = preparar_datos_prediccion(df_pred, resultados_entrenamiento)
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo preparar el CSV para predecir: {e}")
-            return
-
-        try:
-            start_time = time.time()
-            pred = modelo_cargado.predict(df_pred_ready)
-            elapsed = time.time() - start_time
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo predecir: {e}")
-            return
-
+    def _update_pred_results(self, df_pred, df_pred_ready, pred, elapsed, resultados_entrenamiento):
+        """Actualiza los resultados de predicción en la UI."""
         # Guardar predicciones para exportar
         df_out = df_pred.copy()
         df_out["prediccion_intensidad"] = pred
@@ -768,7 +879,7 @@ class SafeDriveApp(tk.Tk):
         except Exception:
             pass
         
-        messagebox.showinfo("Predicción", "Predicciones generadas correctamente.")
+        messagebox.showinfo("Predicción", "Predicciones generadas correctamente.\n\nNota: Los datos meteorológicos se obtienen mediante scraping/mapeo desde AEMET.")
 
     def _apply_pie_theme(self):
         """Aplica los colores del tema actual al gráfico pie."""
@@ -885,6 +996,15 @@ class SafeDriveApp(tk.Tk):
             messagebox.showerror("Error", "Instala folium para ver el mapa: pip install folium")
             return
         
+        # Crear diálogo de carga
+        loading_dialog = LoadingDialog(self, title="Mapa", message="Generando mapa...\nEsto puede tardar un momento")
+        
+        # Iniciar generación de mapa en hilo separado
+        thread = Thread(target=self._map_worker, args=(loading_dialog,), daemon=True)
+        thread.start()
+
+    def _map_worker(self, loading_dialog):
+        """Función que se ejecuta en un hilo separado para generar el mapa."""
         try:
             # Centro en Madrid
             madrid_center = [40.4168, -3.7038]
@@ -943,10 +1063,18 @@ class SafeDriveApp(tk.Tk):
             # Guardar y abrir
             map_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mapa_trafico.html")
             m.save(map_file)
+            
+            # Cerrar diálogo y abrir el mapa
+            self.after(0, lambda: loading_dialog.close())
             webbrowser.open(f"file://{map_file}")
             
         except Exception as e:
-            messagebox.showerror("Error", f"No se pudo generar el mapa: {e}")
+            self.after(0, lambda: loading_dialog.close())
+            self.after(0, lambda: messagebox.showerror("Error", f"No se pudo generar el mapa: {e}"))
+            
+        except Exception as e:
+            self.after(0, lambda: loading_dialog.close())
+            self.after(0, lambda: messagebox.showerror("Error", f"No se pudo generar el mapa: {e}"))
 
 
 if __name__ == "__main__":

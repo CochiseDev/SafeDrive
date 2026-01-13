@@ -1,0 +1,170 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    SAFEDRIVER MODO USUARIO NORMAL                           ║
+║                          GUÍA DE INICIO RÁPIDO                              ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1️⃣  PRIMER USO - VALIDAR QUE FUNCIONA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  $ python INICIO_USUARIO_NORMAL.py
+
+  Esto:
+  • Verifica tu setup (Python, librerías, archivos)
+  • Muestra esta guía en pantalla
+  • Confirma que estás listo
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  2️⃣  PRUEBAS RÁPIDAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  $ python test_user_mode.py
+
+  Ejecuta:
+  • TEST 1: Conexión a AEMET
+  • TEST 2: Mapeo de datos
+  • TEST 3: Condiciones climáticas
+  • TEST 4: Direcciones de viento
+
+  Resultado esperado: ✓ PASS x4
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  3️⃣  EJEMPLO COMPLETO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  $ python ejemplo_user_mode.py
+
+  Simula:
+  • Cargar modelo entrenado
+  • Obtener datos de AEMET
+  • Realizar predicción
+  • Mostrar resultados en tabla
+
+  Resultado: Tabla con predicciones para 5 zonas
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  4️⃣  USAR LA APLICACIÓN (MODO GRÁFICO)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  $ python app.py
+
+  Abre ventana con 3 pestañas:
+  1. Entrenamiento (para entrenar modelos - Técnico)
+  2. Predicción (Técnico) (para predicciones avanzadas)
+  3. Usuario Normal ← PARA TI
+
+  En "Usuario Normal":
+  ├─ 1. Cargar modelo .pkl
+  ├─ 2. Seleccionar fecha (DD/MM/YYYY)
+  ├─ 3. Seleccionar hora (0-23)
+  ├─ 4. Seleccionar zonas (búsqueda disponible)
+  ├─ 5. Obtener datos de AEMET
+  ├─ 6. Click "🔮 PREDECIR"
+  └─ 7. Ver resultados (exportar a CSV opcional)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📚 DOCUMENTACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Para entender cómo funciona:
+  • USER_MODE_GUIDE.md              ← Guía completa
+  • MODO_USUARIO_COMPLETADO.md      ← Resumen técnico
+  • IMPLEMENTACION_USER_MODE.md     ← Detalles de implementación
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🆘 PROBLEMAS FRECUENTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ❌ "ModuleNotFoundError: No module named 'pandas'"
+  ✓  pip install pandas scikit-learn requests beautifulsoup4
+
+  ❌ "Error connecting to AEMET"
+  ✓  Verifica conexión a internet
+
+  ❌ "No se encontró archivo"
+  ✓  Asegúrate que 12-2024_TrafficZones.csv existe
+
+  ❌ "No model loaded"
+  ✓  Entrena primero: pestaña "Entrenamiento" → "Entrenar modelo"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📋 REQUISITOS MÍNIMOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  • Python 3.8+
+  • Conexión a Internet
+  • Archivo: 12-2024_TrafficZones.csv (en el mismo directorio)
+  • Modelo entrenado: archivo .pkl (puedes entrenar primero)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎯 CASOS DE USO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Caso 1: Ejecutivo - "¿Cómo está el tráfico ahora?"
+  • python app.py
+  • Usuario Normal
+  • Fecha: Hoy, Hora: Ahora
+  • Selecciona tu zona
+  • Predecir
+  • Ver resultado
+
+  Caso 2: Planificador - "Rutas para mañana a las 8"
+  • python app.py
+  • Usuario Normal
+  • Fecha: Mañana, Hora: 08
+  • Selecciona: "M-30"
+  • Predecir para todas
+  • Analizar resultados
+
+  Caso 3: Análisis - "Patrón de tráfico por hora"
+  • python ejemplo_user_mode.py
+  • O repetir predicción en app.py para diferentes horas
+  • Comparar resultados
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📊 FLUJO TÍPICO EN 7 PASOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1️⃣  $ python app.py
+  2️⃣  Click pestaña "Usuario Normal"
+  3️⃣  Click "Cargar modelo..." → Selecciona .pkl
+  4️⃣  Fecha (15/01/2026), Hora (14)
+  5️⃣  Busca y selecciona zonas (ej: "Alcalá")
+  6️⃣  Click "Obtener datos de AEMET"
+  7️⃣  Click "🔮 PREDECIR"
+  📊 Ver resultados en tabla
+  💾 Exportar a CSV (opcional)
+
+  ⏱️  Tiempo total: 1-2 minutos
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🚀 LISTO PARA EMPEZAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  OPCIÓN A - Interface Gráfica (Recomendado):
+  $ python app.py
+
+  OPCIÓN B - Validar primero:
+  $ python test_user_mode.py
+
+  OPCIÓN C - Ver ejemplo:
+  $ python ejemplo_user_mode.py
+
+
+═════════════════════════════════════════════════════════════════════════════
+
+  ¿Preguntas? Ve a USER_MODE_GUIDE.md
+
+  ¡A disfrutar! 🎉
+
+═════════════════════════════════════════════════════════════════════════════
