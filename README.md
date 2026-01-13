@@ -150,7 +150,7 @@ SafeDrive/
 ### Instalación de Dependencias
 
 ```bash
-pip install pandas numpy scikit-learn tensorflow matplotlib sv-ttk beautifulsoup4 requests folium joblib darkdetect
+pip install -r requirements.txt
 ```
 
 ### Ejecución
