@@ -456,7 +456,15 @@ Parámetros:
 #### Manejo de Errores
 - Timeout: 10 segundos
 - Reintentos: hasta 3 veces
-- Fallback: valores por defecto si falla
+- Validación de fecha: detecta si está dentro del rango de AEMET (hoy + 7 días)
+- Fallback: valores por defecto si no hay datos de AEMET disponibles
+- Notificación: avisa al usuario cuando usa valores por defecto
+
+#### Disponibilidad de Datos
+- **Datos actuales**: Disponibles para el día de hoy
+- **Predicciones futuras**: AEMET proporciona hasta 7 días adelante
+- **Fechas pasadas**: No tienen datos en AEMET, se usan valores por defecto
+- **Cualquier fecha**: La predicción continúa normalmente usando valores por defecto si AEMET no tiene datos
 
 ### Mapeo de Datos (aemet_mapper.py)
 
@@ -484,14 +492,40 @@ Salida: {
 }
 ```
 
-#### Valores por Defecto
-Si AEMET no proporciona datos:
-- Temperatura: 15°C
-- Precipitación: 0 mm
-- Viento: 5 km/h, Calma
-- Humedad: 60%
-- Presión: 1013 hPa
-- Nubosidad: 50%
+### Valores por Defecto
+
+Si AEMET no proporciona datos (fecha pasada, fuera del rango válido, o error de conexión), el sistema utiliza automáticamente valores meteorológicos por defecto y continúa con la predicción:
+
+```python
+{
+    'temp': 15.0,           # Temperatura media (°C)
+    'feelslike': 15.0,      # Sensación térmica (°C)
+    'dew': 10.0,            # Punto de rocío (°C)
+    'humidity': 60.0,       # Humedad relativa (%)
+    'precip': 0.0,          # Precipitación (mm)
+    'precipprob': 0.0,      # Probabilidad de precipitación (%)
+    'windgust': 15.0,       # Ráfaga máxima (km/h)
+    'windspeed': 10.0,      # Velocidad del viento (km/h)
+    'winddir': 180.0,       # Dirección del viento (grados)
+    'cloudcover': 50.0,     # Cobertura de nubes (%)
+    'visibility': 10.0,     # Visibilidad (km)
+    'conditionsDay': 'Partially cloudy'  # Condición del día
+}
+```
+
+**Comportamiento cuando no hay datos:**
+1. Sistema detecta que AEMET no tiene datos para esa fecha/hora
+2. Muestra advertencia: "Datos AEMET no disponibles"
+3. Informa que usará "valores meteorológicos por defecto"
+4. Advierte que "Las predicciones pueden ser menos precisas"
+5. Continúa con la predicción usando los valores por defecto
+6. La predicción se completa normalmente
+
+**Validación de fechas:**
+- ✅ Hoy: usa datos reales de AEMET
+- ✅ Próximos 7 días: usa datos de predicción de AEMET
+- ✅ Fechas pasadas: usa valores por defecto (sin datos históricos)
+- ✅ Más de 7 días en el futuro: usa valores por defecto
 
 ---
 
@@ -761,14 +795,16 @@ Basado en evaluación comparativa exhaustiva con datos reales, **Random Forest M
 
 ### Limitaciones Conocidas
 
-1. **Datos AEMET**: Solo disponibles para horas recientes/actuales
-2. **Cobertura**: Solo zonas de Madrid capital
-3. **Idioma**: Interfaz en español
-4. **Plataforma**: Diseñado para Windows/Linux/Mac con Python 3.12+
+1. **Datos AEMET**: Disponibles para hoy + próximos 7 días (límite de AEMET)
+   - Fechas fuera de este rango usan valores meteorológicos por defecto
+2. **Validación de formato**: Requiere fechas en formato DD/MM/YYYY
+3. **Cobertura**: Solo zonas de Madrid capital
+4. **Idioma**: Interfaz en español
+5. **Plataforma**: Diseñado para Windows/Linux/Mac con Python 3.12+
 
 ### Mejoras Futuras Sugeridas
 
-1. Predicción multi-fecha (próximas 24-48h)
+1. Predicción multi-fecha (próximos 7 días con datos AEMET reales)
 2. Integración con API oficial AEMET
 3. Exportación a otros formatos (Excel, JSON)
 4. Gráficos de series temporales

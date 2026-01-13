@@ -466,17 +466,21 @@ class UserModeTab:
             messagebox.showerror("Error", f"No se pudo cargar el modelo:\n{e}")
             self.lbl_model_status.config(text="❌ Error cargando modelo", foreground="red")
     
-    def _fetch_aemet_data(self) -> bool:
+    def _fetch_aemet_data(self) -> dict:
         """Obtiene datos meteorológicos de AEMET.
         
         Returns:
-            bool: True si se obtuvieron datos correctamente, False en caso contrario
+            dict: {
+                'success': bool,
+                'error_type': str ('network', 'no_data', None)
+            }
         """
         try:
             scraper = AemetScraper()
             
             if not scraper.test_connection():
-                return False
+                # Error de conexión/red
+                return {'success': False, 'error_type': 'network'}
             
             # Validar que la fecha esté en el rango válido para AEMET
             # AEMET tiene datos actuales y predicciones hasta ~7 días en el futuro
@@ -490,32 +494,33 @@ class UserModeTab:
                 
                 # AEMET solo tiene datos desde hoy hasta ~7 días en el futuro
                 if days_diff < 0:  # Fecha pasada
-                    return False
+                    return {'success': False, 'error_type': 'no_data'}
                 if days_diff > 7:  # Más de 7 días en el futuro
-                    return False
+                    return {'success': False, 'error_type': 'no_data'}
             except:
-                return False
+                return {'success': False, 'error_type': 'no_data'}
             
             # Obtener hora
             try:
                 hour = int(self.hour_var.get())
                 if not 0 <= hour <= 23:
-                    return False
+                    return {'success': False, 'error_type': 'no_data'}
             except:
-                return False
+                return {'success': False, 'error_type': 'no_data'}
             
             # Obtener datos horarios
             hourly_data = scraper.get_hourly_data()
             
             hour_str = str(hour).zfill(2)
             if hour_str not in hourly_data:
-                return False
+                return {'success': False, 'error_type': 'no_data'}
             
             self.last_aemet_data = hourly_data[hour_str]
-            return True
+            return {'success': True, 'error_type': None}
             
-        except Exception:
-            return False
+        except Exception as e:
+            # Cualquier excepción no controlada probablemente sea de red
+            return {'success': False, 'error_type': 'network'}
     
     def _make_prediction(self):
         """Realiza predicción con datos seleccionados."""
@@ -553,16 +558,29 @@ class UserModeTab:
                 return
             
             # Obtener datos de AEMET automáticamente
-            aemet_available = self._fetch_aemet_data()
+            aemet_result = self._fetch_aemet_data()
+            aemet_available = aemet_result['success']
+            error_type = aemet_result['error_type']
             
             if not aemet_available:
-                # Mostrar advertencia pero continuar con valores por defecto
-                self.tab.after(0, lambda: messagebox.showwarning(
-                    "Datos AEMET no disponibles", 
-                    "No se pudieron obtener datos de AEMET para la fecha/hora seleccionada.\n\n" +
-                    "Se usarán valores meteorológicos por defecto.\n" +
-                    "Las predicciones pueden ser menos precisas."
-                ))
+                # Mostrar advertencia según el tipo de error
+                if error_type == 'network':
+                    # Error de red
+                    self.tab.after(0, lambda: messagebox.showwarning(
+                        "Error de Conexión", 
+                        "No se pudo conectar con AEMET debido a un problema de red.\n\n" +
+                        "Verifica tu conexión a internet.\n\n" +
+                        "Se usarán valores meteorológicos por defecto.\n" +
+                        "Las predicciones pueden ser menos precisas."
+                    ))
+                else:
+                    # Sin datos para esa fecha/hora
+                    self.tab.after(0, lambda: messagebox.showwarning(
+                        "Datos AEMET no disponibles", 
+                        "No se pudieron obtener datos de AEMET para la fecha/hora seleccionada.\n\n" +
+                        "Se usarán valores meteorológicos por defecto.\n" +
+                        "Las predicciones pueden ser menos precisas."
+                    ))
             
             start_time = time.time()
             
