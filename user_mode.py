@@ -134,7 +134,8 @@ class ZoneSelector:
             list_frame,
             yscrollcommand=scrollbar.set,
             selectmode="multiple",
-            height=10
+            height=10,
+            exportselection=False
         )
         self.zone_listbox.pack(side="left", fill="both", expand=True)
         scrollbar.config(command=self.zone_listbox.yview)
@@ -167,7 +168,7 @@ class ZoneSelector:
             display = f"[{zone_id}] {zone_name}"
             self.zone_listbox.insert("end", display)
             
-            # Marcar como seleccionado si estaba previamente
+            # Marcar como seleccionado si está en selected_ids (mantener selección anterior)
             if zone_id in self.selected_ids:
                 self.zone_listbox.selection_set("end")
         
@@ -183,11 +184,24 @@ class ZoneSelector:
         if self.updating_list:
             return
         
-        self.selected_ids.clear()
+        # Solo actualizar los IDs que están en la lista actual
+        # No limpiar completamente para mantener zonas no visibles en la búsqueda
+        visible_ids = set()
+        for index in range(self.zone_listbox.size()):
+            display_text = self.zone_listbox.get(index)
+            try:
+                zone_id = int(display_text.split("]")[0][1:])
+                visible_ids.add(zone_id)
+            except:
+                pass
         
+        # Remover solo los IDs visibles que estaban en selected_ids
+        # y mantener los que no están en la lista actual (búsqueda anterior)
+        self.selected_ids = self.selected_ids - visible_ids
+        
+        # Agregar los IDs que están actualmente seleccionados en el listbox
         for index in self.zone_listbox.curselection():
             display_text = self.zone_listbox.get(index)
-            # Extraer ID del formato "[ID] Nombre"
             try:
                 zone_id = int(display_text.split("]")[0][1:])
                 self.selected_ids.add(zone_id)
@@ -195,14 +209,40 @@ class ZoneSelector:
                 pass
     
     def _select_all(self):
-        """Selecciona todas las zonas."""
+        """Selecciona todas las zonas visibles (agrégalas a las ya seleccionadas)."""
+        # Extraer IDs de las zonas visibles actualmente
+        visible_zones_ids = set()
+        for index in range(self.zone_listbox.size()):
+            display_text = self.zone_listbox.get(index)
+            try:
+                zone_id = int(display_text.split("]")[0][1:])
+                visible_zones_ids.add(zone_id)
+            except:
+                pass
+        
+        # Agregar todos los IDs visibles a la selección
+        self.selected_ids.update(visible_zones_ids)
+        
+        # Seleccionar en la UI
         self.zone_listbox.selection_set(0, "end")
-        self._on_listbox_select()
     
     def _deselect_all(self):
-        """Deselecciona todas las zonas."""
+        """Deselecciona todas las zonas visibles."""
+        # Extraer IDs de las zonas visibles actualmente
+        visible_zones_ids = set()
+        for index in range(self.zone_listbox.size()):
+            display_text = self.zone_listbox.get(index)
+            try:
+                zone_id = int(display_text.split("]")[0][1:])
+                visible_zones_ids.add(zone_id)
+            except:
+                pass
+        
+        # Remover solo los IDs visibles de la selección
+        self.selected_ids -= visible_zones_ids
+        
+        # Deseleccionar en la UI
         self.zone_listbox.selection_clear(0, "end")
-        self._on_listbox_select()
     
     def get_selected_ids(self) -> list:
         """Retorna lista de IDs seleccionados."""
