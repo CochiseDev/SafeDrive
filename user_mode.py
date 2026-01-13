@@ -478,6 +478,24 @@ class UserModeTab:
             if not scraper.test_connection():
                 return False
             
+            # Validar que la fecha esté en el rango válido para AEMET
+            # AEMET tiene datos actuales y predicciones hasta ~7 días en el futuro
+            try:
+                date_obj = datetime.strptime(self.date_var.get(), "%d/%m/%Y")
+                today = datetime.now().date()
+                date_selected = date_obj.date()
+                
+                # Calcular diferencia de días
+                days_diff = (date_selected - today).days
+                
+                # AEMET solo tiene datos desde hoy hasta ~7 días en el futuro
+                if days_diff < 0:  # Fecha pasada
+                    return False
+                if days_diff > 7:  # Más de 7 días en el futuro
+                    return False
+            except:
+                return False
+            
             # Obtener hora
             try:
                 hour = int(self.hour_var.get())
@@ -523,25 +541,7 @@ class UserModeTab:
         try:
             import time
             
-            # Obtener datos de AEMET automáticamente
-            if not self._fetch_aemet_data():
-                self.tab.after(0, lambda: messagebox.showerror(
-                    "Error", 
-                    "No se pudieron obtener datos de AEMET.\n\nVerifique:\n" +
-                    "- Conexión a internet\n" +
-                    "- Que la hora sea válida (0-23)\n" +
-                    "- Que AEMET tenga datos para esa hora"
-                ))
-                self.tab.after(0, lambda: loading_dialog.close())
-                return
-            
-            start_time = time.time()
-            
-            # Mapear datos AEMET
-            mapper = AemetMapper()
-            aemet_mapped = mapper.create_prediction_dict(self.last_aemet_data)
-            
-            # Crear DataFrame de predicción
+            # Validar formato de fecha PRIMERO antes de intentar obtener datos de AEMET
             try:
                 date_obj = datetime.strptime(self.date_var.get(), "%d/%m/%Y")
                 hour = int(self.hour_var.get())
@@ -551,6 +551,41 @@ class UserModeTab:
                 self.tab.after(0, lambda: messagebox.showerror("Error", "Formato de fecha inválido (DD/MM/YYYY)"))
                 self.tab.after(0, lambda: loading_dialog.close())
                 return
+            
+            # Obtener datos de AEMET automáticamente
+            aemet_available = self._fetch_aemet_data()
+            
+            if not aemet_available:
+                # Mostrar advertencia pero continuar con valores por defecto
+                self.tab.after(0, lambda: messagebox.showwarning(
+                    "Datos AEMET no disponibles", 
+                    "No se pudieron obtener datos de AEMET para la fecha/hora seleccionada.\n\n" +
+                    "Se usarán valores meteorológicos por defecto.\n" +
+                    "Las predicciones pueden ser menos precisas."
+                ))
+            
+            start_time = time.time()
+            
+            # Mapear datos AEMET o usar valores por defecto
+            if aemet_available:
+                mapper = AemetMapper()
+                aemet_mapped = mapper.create_prediction_dict(self.last_aemet_data)
+            else:
+                # Usar valores por defecto razonables (mismas claves que AemetMapper)
+                aemet_mapped = {
+                    'temp': 15.0,           # Temperatura media
+                    'feelslike': 15.0,      # Sensación térmica
+                    'dew': 10.0,            # Punto de rocío
+                    'humidity': 60.0,       # Humedad media
+                    'precip': 0.0,          # Sin precipitación
+                    'precipprob': 0.0,      # Probabilidad de precipitación
+                    'windgust': 15.0,       # Ráfaga de viento
+                    'windspeed': 10.0,      # Velocidad del viento moderada
+                    'winddir': 180.0,       # Dirección del viento (Sur)
+                    'cloudcover': 50.0,     # Parcialmente nublado
+                    'visibility': 10.0,     # Buena visibilidad (km)
+                    'conditionsDay': 'Partially cloudy'  # Condición del día
+                }
             
             # Crear filas para cada zona
             rows = []
@@ -570,8 +605,8 @@ class UserModeTab:
             
             elapsed = time.time() - start_time
             
-            # Actualizar resultados en el hilo principal
-            self.tab.after(0, lambda: self._update_prediction_results(df_pred, selected_zones, pred, elapsed))
+            # Actualizar resultados en el hilo principal, pasando si AEMET está disponible
+            self.tab.after(0, lambda: self._update_prediction_results(df_pred, selected_zones, pred, elapsed, aemet_available))
             
             # Cerrar el diálogo de carga
             self.tab.after(100, lambda: loading_dialog.close())
@@ -581,8 +616,16 @@ class UserModeTab:
             self.tab.after(0, lambda: messagebox.showerror("Error", f"Error en predicción:\n{traceback.format_exc()}"))
             self.tab.after(0, lambda: loading_dialog.close())
 
-    def _update_prediction_results(self, df_pred, selected_zones, pred, elapsed):
-        """Actualiza los resultados de predicción en la UI."""
+    def _update_prediction_results(self, df_pred, selected_zones, pred, elapsed, aemet_available=True):
+        """Actualiza los resultados de predicción en la UI.
+        
+        Args:
+            df_pred: DataFrame con datos de predicción
+            selected_zones: Lista de IDs de zonas seleccionadas
+            pred: Array con predicciones
+            elapsed: Tiempo transcurrido
+            aemet_available: Si los datos de AEMET estaban disponibles
+        """
         try:
             # Guardar predicciones
             df_out = df_pred.copy()
@@ -671,7 +714,10 @@ class UserModeTab:
             if MATPLOTLIB_AVAILABLE:
                 self._update_pie_chart(bajos, medios, altos)
             
-            messagebox.showinfo("Predicción", "Predicciones generadas correctamente.\n\nNota: Los datos meteorológicos se obtienen mediante scraping/mapeo desde AEMET.")
+            # Solo mostrar mensaje de éxito si AEMET estaba disponible
+            # (si no estaba, ya se mostró la advertencia)
+            if aemet_available:
+                messagebox.showinfo("Predicción", "Predicciones generadas correctamente.\n\nNota: Los datos meteorológicos se obtienen mediante scraping/mapeo desde AEMET.")
         
         except Exception as e:
             import traceback
