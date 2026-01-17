@@ -341,7 +341,7 @@ class UserModeTab:
         )
         btn_predict.grid(row=3, column=2, padx=(10, 15), pady=(10, 5), sticky="e")
         
-        # Fila 4: Tabla y Resumen (similar a predicción técnico)
+        # Fila 4: Tabla y Resumen
         center_frame = ttk.Frame(tab)
         center_frame.grid(row=4, column=0, columnspan=3, padx=15, pady=(10, 5), sticky="nsew")
         tab.rowconfigure(4, weight=2, minsize=180)

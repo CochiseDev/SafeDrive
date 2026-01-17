@@ -381,7 +381,7 @@ class SafeDriveApp(tk.Tk):
 
         # Se eliminan gráficos de muestra en entrenamiento
 
-        # Guardar modelo (ahora en fila 4)
+        # Guardar modelo
         lbl_guardar = ttk.Label(tab, text="Guardar modelo:")
         lbl_guardar.grid(row=4, column=0, sticky="e",
                          padx=(15, 5), pady=(10, 15))
@@ -468,8 +468,6 @@ class SafeDriveApp(tk.Tk):
         self.tree.configure(yscrollcommand=scrollbar.set)
         table_frame.rowconfigure(0, weight=1)
 
-        # Sin filas de ejemplo: se llenará tras predecir
-
         # Resumen
         resumen_card = ttk.Labelframe(
             center_frame, text="RESUMEN", style="Card.TLabelframe"
@@ -510,7 +508,7 @@ class SafeDriveApp(tk.Tk):
             self.lbl_chart_placeholder = ttk.Label(resumen_card, text="Instala matplotlib para ver el gráfico")
             self.lbl_chart_placeholder.grid(row=5, column=0, pady=(8, 5))
 
-        # Fila 3: Mapa
+        # Mapa
         bottom_map = ttk.Frame(tab)
         bottom_map.grid(row=4, column=0, columnspan=3,
                 padx=15, pady=(10, 5), sticky="ew")
@@ -523,7 +521,7 @@ class SafeDriveApp(tk.Tk):
         )
         btn_mapa.grid(row=0, column=1, pady=(0, 0))
 
-        # Fila 4: Guardar resultados
+        # Guardar resultados
         lbl_guardar_res = ttk.Label(tab, text="Guardar resultados:")
         lbl_guardar_res.grid(row=5, column=0, sticky="e",
                      padx=(15, 5), pady=(5, 15))
@@ -830,7 +828,7 @@ class SafeDriveApp(tk.Tk):
                     lat = parse_coordinate(zone_info.get("latitud"))
                     lon = parse_coordinate(zone_info.get("longitud"))
                     
-                    # Fallback a Madrid center si falla la conversión
+                    # Fallback a Madrid center (Sol km0) si falla la conversión
                     if lat is None:
                         lat = 40.4168
                     if lon is None:
