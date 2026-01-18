@@ -808,9 +808,7 @@ Basado en evaluación comparativa exhaustiva con datos reales, **Random Forest M
 2. Integración con API oficial AEMET
 3. Exportación a otros formatos (Excel, JSON)
 4. Gráficos de series temporales
-5. Comparación de predicciones vs real
-6. Modo oscuro/claro manual
-7. Soporte para otras ciudades
+5. Soporte para otras ciudades
 
 ### Contribuciones
 
