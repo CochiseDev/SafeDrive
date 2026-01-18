@@ -51,28 +51,27 @@ class AemetScraper:
                     
                     # Extraer hora
                     hora_match = re.search(r'>(\d{1,2})<\/td>', row_str)
-                    if not hora_match:
-                        continue
-                    hora = hora_match.group(1).zfill(2)
-                    
-                    # Extraer datos
-                    data = {
-                        'hora': hora,
-                        'estadoCielo': self._extract_text(row_str, r'title="([^"]+)"\/><\/td>'),
-                        'temperatura': self._extract_number(row_str, r'<td class="borde_rb">\s*(\d+)<\/td>', 0),
-                        'sensacionTermica': self._extract_number(row_str, r'<td class="borde_rb">\s*(\d+)<\/td>', 1),
-                        'direccionViento': self._extract_text(row_str, r'<div class="texto_viento">(\w+)<\/div>'),
-                        'velocidadViento': self._extract_number(row_str, r'<div class="texto_km_viento"><div>(\d+)<\/div>', 0),
-                        'rachaMaxima': self._extract_number(row_str, r'borde_rb">\s*(\d+)<\/td>\n<td class="borde_rb">\s*(\d+)', 0),
-                        'precipitacion': self._extract_number(row_str, r'borde_rb">\s*(\d+)<\/td>\n<td class="borde_rb">\s*(\d+)', 1),
-                        'humedadRelativa': self._extract_number(row_str, r'borde_rb">\s*(\d+)<\/td>\n<td class="borde_rb">\s*(\d+)<\/td>\n<td class="borde_rb">\s*(\d+)<\/td>\n<td class="borde_rb">\s*(\d+)', 3),
-                    }
-                    
-                    hourly_data[hora] = data
-                    
+                    if hora_match:
+                        hora = hora_match.group(1).zfill(2)
+                        
+                        # Extraer datos
+                        data = {
+                            'hora': hora,
+                            'estadoCielo': self._extract_text(row_str, r'title="([^"]+)"\/><\/td>'),
+                            'temperatura': self._extract_number(row_str, r'<td class="borde_rb">\s*(\d+)<\/td>', 0),
+                            'sensacionTermica': self._extract_number(row_str, r'<td class="borde_rb">\s*(\d+)<\/td>', 1),
+                            'direccionViento': self._extract_text(row_str, r'<div class="texto_viento">(\w+)<\/div>'),
+                            'velocidadViento': self._extract_number(row_str, r'<div class="texto_km_viento"><div>(\d+)<\/div>', 0),
+                            'rachaMaxima': self._extract_number(row_str, r'borde_rb">\s*(\d+)<\/td>\n<td class="borde_rb">\s*(\d+)', 0),
+                            'precipitacion': self._extract_number(row_str, r'borde_rb">\s*(\d+)<\/td>\n<td class="borde_rb">\s*(\d+)', 1),
+                            'humedadRelativa': self._extract_number(row_str, r'borde_rb">\s*(\d+)<\/td>\n<td class="borde_rb">\s*(\d+)<\/td>\n<td class="borde_rb">\s*(\d+)<\/td>\n<td class="borde_rb">\s*(\d+)', 3),
+                        }
+                        
+                        hourly_data[hora] = data
+                        
                 except Exception as e:
                     print(f"⚠️ Error procesando fila horaria: {e}")
-                    continue
+                    pass
             
             return hourly_data
             

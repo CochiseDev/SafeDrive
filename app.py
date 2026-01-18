@@ -1029,34 +1029,31 @@ class SafeDriveApp(tk.Tk):
                     for coord_info in self.last_zone_coords:
                         if coord_info['id'] == row.get('id'):
                             coords = coord_info
-                            break
                     
-                    if coords is None:
-                        continue
-                    
-                    nivel = row.get('nivel_trafico', 'Desconocido')
-                    intensidad = row.get('prediccion_intensidad', 0)
-                    zona = row.get('zona_nombre', 'Desconocida')
-                    
-                    color = color_map.get(nivel, "gray")
-                    
-                    popup_text = f"""
-                    <b>Zona:</b> {zona}<br>
-                    <b>ID:</b> {row.get('id')}<br>
-                    <b>Intensidad:</b> {intensidad:.1f}<br>
-                    <b>Nivel:</b> {nivel}
-                    """
-                    
-                    folium.CircleMarker(
-                        location=[coords['lat'], coords['lon']],
-                        radius=8,
-                        popup=folium.Popup(popup_text, max_width=250),
-                        color=color,
-                        fill=True,
-                        fillColor=color,
-                        fillOpacity=0.7,
-                        weight=2
-                    ).add_to(m)
+                    if coords is not None:
+                        nivel = row.get('nivel_trafico', 'Desconocido')
+                        intensidad = row.get('prediccion_intensidad', 0)
+                        zona = row.get('zona_nombre', 'Desconocida')
+                        
+                        color = color_map.get(nivel, "gray")
+                        
+                        popup_text = f"""
+                        <b>Zona:</b> {zona}<br>
+                        <b>ID:</b> {row.get('id')}<br>
+                        <b>Intensidad:</b> {intensidad:.1f}<br>
+                        <b>Nivel:</b> {nivel}
+                        """
+                        
+                        folium.CircleMarker(
+                            location=[coords['lat'], coords['lon']],
+                            radius=8,
+                            popup=folium.Popup(popup_text, max_width=250),
+                            color=color,
+                            fill=True,
+                            fillColor=color,
+                            fillOpacity=0.7,
+                            weight=2
+                        ).add_to(m)
             
             # Guardar y abrir
             map_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mapa_trafico.html")

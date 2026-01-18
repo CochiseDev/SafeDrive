@@ -161,16 +161,14 @@ class ZoneSelector:
             zone_name = str(row['nombre'])  # Convertir a string por si es float
             
             # Filtro por nombre
-            if filter_lower and filter_lower not in zone_name.lower():
-                continue
-            
-            # Mostrar ID + Nombre
-            display = f"[{zone_id}] {zone_name}"
-            self.zone_listbox.insert("end", display)
-            
-            # Marcar como seleccionado si está en selected_ids (mantener selección anterior)
-            if zone_id in self.selected_ids:
-                self.zone_listbox.selection_set("end")
+            if not filter_lower or filter_lower in zone_name.lower():
+                # Mostrar ID + Nombre
+                display = f"[{zone_id}] {zone_name}"
+                self.zone_listbox.insert("end", display)
+                
+                # Marcar como seleccionado si está en selected_ids (mantener selección anterior)
+                if zone_id in self.selected_ids:
+                    self.zone_listbox.selection_set("end")
         
         self.updating_list = False
     
@@ -872,34 +870,31 @@ class UserModeTab:
                     for coord_info in self.last_zone_coords:
                         if coord_info['id'] == row.get('id'):
                             coords = coord_info
-                            break
                     
-                    if coords is None:
-                        continue
-                    
-                    nivel = row.get('nivel_trafico', 'Desconocido')
-                    intensidad = row.get('prediccion_intensidad', 0)
-                    zona = row.get('zona_nombre', 'Desconocida')
-                    
-                    color = color_map.get(nivel, "gray")
-                    
-                    popup_text = f"""
-                    <b>Zona:</b> {zona}<br>
-                    <b>ID:</b> {row.get('id')}<br>
-                    <b>Intensidad:</b> {intensidad:.1f}<br>
-                    <b>Nivel:</b> {nivel}
-                    """
-                    
-                    folium.CircleMarker(
-                        location=[coords['lat'], coords['lon']],
-                        radius=8,
-                        popup=folium.Popup(popup_text, max_width=250),
-                        color=color,
-                        fill=True,
-                        fillColor=color,
-                        fillOpacity=0.7,
-                        weight=2
-                    ).add_to(m)
+                    if coords is not None:
+                        nivel = row.get('nivel_trafico', 'Desconocido')
+                        intensidad = row.get('prediccion_intensidad', 0)
+                        zona = row.get('zona_nombre', 'Desconocida')
+                        
+                        color = color_map.get(nivel, "gray")
+                        
+                        popup_text = f"""
+                        <b>Zona:</b> {zona}<br>
+                        <b>ID:</b> {row.get('id')}<br>
+                        <b>Intensidad:</b> {intensidad:.1f}<br>
+                        <b>Nivel:</b> {nivel}
+                        """
+                        
+                        folium.CircleMarker(
+                            location=[coords['lat'], coords['lon']],
+                            radius=8,
+                            popup=folium.Popup(popup_text, max_width=250),
+                            color=color,
+                            fill=True,
+                            fillColor=color,
+                            fillOpacity=0.7,
+                            weight=2
+                        ).add_to(m)
             
             map_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mapa_trafico_user.html")
             m.save(map_file)
