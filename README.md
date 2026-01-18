@@ -1,7 +1,7 @@
 # 📘 Documentación Completa - SafeDrive
 
 **Sistema de Predicción de Tráfico en Madrid**  
-Versión: 2.0  
+Versión: 2.1.0
 Fecha: Enero 2026
 
 ---
@@ -830,5 +830,5 @@ Para problemas o preguntas:
 
 ---
 
-**SafeDrive v2.0** - Sistema de Predicción de Tráfico en Madrid  
+**SafeDrive v2.1.0** - Sistema de Predicción de Tráfico en Madrid  
 Documentación actualizada: Enero 2026
