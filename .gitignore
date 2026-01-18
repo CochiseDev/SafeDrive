@@ -1,0 +1,52 @@
+# SafeDrive - GitIgnore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Modelos entrenados
+*.mdl
+*.pkl
+
+# Mapas generados
+*.html
+
+# Distribución / empaquetado
+dist/
+build/
+*.egg-info/
+
+# Entornos virtuales
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# CSV de resultados temporales (opcional, descomenta si no quieres subirlos)
+# *_resultados.csv
+# *_predicciones.csv
+
+# Archivos de desarrollo temporal
+Aemet_Webscrapping.py
+test_*.py
+temp_*.py
