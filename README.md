@@ -8,17 +8,17 @@ Fecha: Enero 2026
 
 ## 📑 Índice
 
-1. [Visión General](#visión-general)
-2. [Características Principales](#características-principales)
-3. [Arquitectura del Sistema](#arquitectura-del-sistema)
-4. [Instalación y Configuración](#instalación-y-configuración)
-5. [Modo Técnico](#modo-técnico)
-6. [Modo Usuario (Predicción)](#modo-usuario-predicción)
-7. [Algoritmos de Machine Learning](#algoritmos-de-machine-learning)
-8. [Integración con AEMET](#integración-con-aemet)
-9. [API y Estructura de Datos](#api-y-estructura-de-datos)
-10. [Guía de Uso](#guía-de-uso)
-11. [Troubleshooting](#troubleshooting)
+1. [Visión General](#-visión-general)
+2. [Características Principales](#-características-principales)
+3. [Arquitectura del Sistema](#%EF%B8%8F-arquitectura-del-sistema)
+4. [Instalación y Configuración](#%EF%B8%8F-instalación-y-configuración)
+5. [Modo Técnico](#-modo-técnico)
+6. [Modo Usuario (Predicción)](#-modo-usuario-predicción)
+7. [Algoritmos de Machine Learning](#-algoritmos-de-machine-learning)
+8. [Integración con AEMET](#%EF%B8%8F-integración-con-aemet)
+9. [API y Estructura de Datos](#-api-y-estructura-de-datos)
+10. [Guía de Uso](#-guía-de-uso)
+11. [Troubleshooting](#-troubleshooting)
 
 ---
 
