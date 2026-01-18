@@ -804,11 +804,12 @@ Basado en evaluación comparativa exhaustiva con datos reales, **Random Forest M
 
 ### Mejoras Futuras Sugeridas
 
-1. Predicción multi-fecha (próximos 7 días con datos AEMET reales)
-2. Integración con API oficial AEMET
+1. Predicción multi-fecha (de momento sólo próximos 7 días con datos AEMET reales)
+2. Integración con API oficial AEMET (hasta ahora webscraping por requisitos del proyecto)
 3. Exportación a otros formatos (Excel, JSON)
 4. Gráficos de series temporales
 5. Soporte para otras ciudades
+6. Modelo complementario de predicción de accidentes
 
 ### Contribuciones
 
