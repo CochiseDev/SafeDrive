@@ -70,13 +70,13 @@ class AemetScraper:
                         hourly_data[hora] = data
                         
                 except Exception as e:
-                    print(f"⚠️ Error procesando fila horaria: {e}")
+                    print(f"Error procesando fila horaria: {e}")
                     pass
             
             return hourly_data
             
         except requests.RequestException as e:
-            print(f"❌ Error en request AEMET: {e}")
+            print(f"Error en request AEMET: {e}")
             return {}
     
     def get_daily_data(self) -> Dict[str, Dict[str, Any]]:
@@ -99,7 +99,7 @@ class AemetScraper:
             return daily_data
             
         except requests.RequestException as e:
-            print(f"❌ Error en request AEMET (daily): {e}")
+            print(f"Error en request AEMET (daily): {e}")
             return {}
     
     @staticmethod
@@ -157,17 +157,17 @@ class AemetScraper:
 
 if __name__ == "__main__":
     # Prueba del scraper
-    print("🌐 Probando conexión a AEMET...")
+    print("Probando conexión a AEMET...")
     scraper = AemetScraper()
     
     if scraper.test_connection():
-        print("✓ Conexión exitosa\n")
+        print("Conexión exitosa\n")
         
-        print("📊 Extrayendo datos horarios...")
+        print("Extrayendo datos horarios...")
         hourly = scraper.get_hourly_data()
         
         if hourly:
-            print(f"✓ Se extrajeron {len(hourly)} horas\n")
+            print(f"Se extrajeron {len(hourly)} horas\n")
             
             # Mostrar primeras 3 horas
             for hora, datos in list(hourly.items())[:3]:
@@ -176,6 +176,6 @@ if __name__ == "__main__":
                     print(f"  {key}: {value}")
                 print()
         else:
-            print("❌ No se pudieron extraer datos")
+            print("No se pudieron extraer datos")
     else:
-        print("❌ Error de conexión a AEMET")
+        print("Error de conexión a AEMET")

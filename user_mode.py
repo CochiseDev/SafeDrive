@@ -462,7 +462,7 @@ class UserModeTab:
             )
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo cargar el modelo:\n{e}")
-            self.lbl_model_status.config(text="❌ Error cargando modelo", foreground="red")
+            self.lbl_model_status.config(text="Error cargando modelo", foreground="red")
     
     def _fetch_aemet_data(self) -> dict:
         """Obtiene datos meteorológicos de AEMET.

@@ -108,20 +108,25 @@ class AemetMapper:
         
         # Buscar en el mapeo
         condition_lower = aemet_condition.lower().strip()
+        mapped_condition = None
         
         # Búsqueda exacta primero
         for aemet_key, model_value in AEMET_CONDITIONS_MAPPING.items():
             if condition_lower == aemet_key.lower():
-                return model_value
+                mapped_condition = model_value
         
-        # Búsqueda por substring (si contiene palabras clave)
-        for aemet_key, model_value in AEMET_CONDITIONS_MAPPING.items():
-            if aemet_key.lower() in condition_lower or condition_lower in aemet_key.lower():
-                return model_value
+        # Si no encontró exacta, búsqueda por substring (si contiene palabras clave)
+        if mapped_condition is None:
+            for aemet_key, model_value in AEMET_CONDITIONS_MAPPING.items():
+                if aemet_key.lower() in condition_lower or condition_lower in aemet_key.lower():
+                    mapped_condition = model_value
         
         # Si no encuentra, por defecto clear
-        print(f"⚠️ Condición AEMET no mapeada: '{aemet_condition}' → asignando 'clear'")
-        return 'clear'
+        if mapped_condition is None:
+            print(f"Condición AEMET no mapeada: '{aemet_condition}' → asignando 'clear'")
+            mapped_condition = 'clear'
+        
+        return mapped_condition
     
     @staticmethod
     def map_wind_direction(direction: str) -> float:
@@ -140,12 +145,16 @@ class AemetMapper:
         direction_upper = direction.upper().strip()
         
         # Búsqueda en mapeo
+        mapped_direction = None
         if direction_upper in WIND_DIRECTION_MAPPING:
-            return WIND_DIRECTION_MAPPING[direction_upper]
+            mapped_direction = WIND_DIRECTION_MAPPING[direction_upper]
         
-        # Por defecto N
-        print(f"⚠️ Dirección viento no mapeada: '{direction}' → asignando 0 (N)")
-        return 0.0
+        # Si no encuentra, por defecto N
+        if mapped_direction is None:
+            print(f"Dirección viento no mapeada: '{direction}' → asignando 0 (N)")
+            mapped_direction = 0.0
+        
+        return mapped_direction
     
     @staticmethod
     def clean_numeric(value: str) -> float:
@@ -166,7 +175,7 @@ class AemetMapper:
             clean_value = str(value).strip().replace(',', '.')
             return float(clean_value)
         except (ValueError, AttributeError):
-            print(f"⚠️ No se pudo convertir valor numérico: '{value}' → asignando 0")
+            print(f"No se pudo convertir valor numérico: '{value}' → asignando 0")
             return 0.0
     
     @staticmethod
